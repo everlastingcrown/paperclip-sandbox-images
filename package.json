@@ -8,21 +8,35 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "prepare": "husky",
+    "lint-staged": "lint-staged",
     "images": "node --import tsx src/cli.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
     "check": "tsc --noEmit && eslint . && vitest run && node --import tsx src/cli.ts validate"
   },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,mts,cts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "!(*.{js,mjs,cjs,ts,mts,cts})": "prettier --write --ignore-unknown"
+  },
   "dependencies": {
     "ajv": "8.20.0",
     "semver": "7.8.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
     "@eslint/js": "10.0.1",
     "@types/node": "24.19.2",
     "@types/semver": "7.8.0",
     "eslint": "10.12.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",

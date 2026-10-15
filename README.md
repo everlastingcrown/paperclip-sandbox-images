@@ -12,16 +12,16 @@ The active catalog is intentionally empty. This foundation contains **no Dockerf
 
 ## Layout
 
-| Location | Purpose |
-| --- | --- |
-| `catalog/` | Active image definitions and JSON Schema |
-| `images/base/` | Future shared runtime and hardening recipes |
-| `images/harnesses/` | Future agent CLI recipes |
-| `images/toolsets/` | Future capability recipes layered onto harnesses |
-| `src/` | TypeScript validation, dependency planning, building, testing, and promotion |
-| `scripts/` | Runtime contract and checksum-pinned CI tools |
-| `tests/` | Infrastructure tests and illustrative catalog metadata |
-| `.github/workflows/images.yml` | Change-triggered, manual, and weekly pipelines |
+| Location                       | Purpose                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| `catalog/`                     | Active image definitions and JSON Schema                                     |
+| `images/base/`                 | Future shared runtime and hardening recipes                                  |
+| `images/harnesses/`            | Future agent CLI recipes                                                     |
+| `images/toolsets/`             | Future capability recipes layered onto harnesses                             |
+| `src/`                         | TypeScript validation, dependency planning, building, testing, and promotion |
+| `scripts/`                     | Runtime contract and checksum-pinned CI tools                                |
+| `tests/`                       | Infrastructure tests and illustrative catalog metadata                       |
+| `.github/workflows/images.yml` | Change-triggered, manual, and weekly pipelines                               |
 
 ## Development
 
@@ -33,6 +33,8 @@ pnpm install --frozen-lockfile
 pnpm check
 pnpm images plan --select all
 ```
+
+Installing dependencies also sets up Husky Git hooks. Commits automatically run ESLint with fixes and Prettier on staged JavaScript and TypeScript files through lint-staged. Other supported staged files, including JSON, YAML, and Markdown, are formatted with Prettier. Commit messages are validated with commitlint. Use Conventional Commits, for example `feat: add a base image` or `fix: validate parent digests`. Pushes run the full unit test suite with `pnpm test`.
 
 `pnpm check` runs type checking, linting, unit tests, and catalog validation. For workflow/recipe linting on Linux:
 

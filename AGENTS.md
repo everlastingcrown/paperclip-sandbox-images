@@ -14,13 +14,21 @@ Build and publish Docker images for Paperclip agent sandboxes: **base → harnes
 
 ## Development
 
-Use **Node.js 24**, the exact pnpm version in `package.json`, strict TypeScript/ESM, ESLint, and Vitest. TypeScript imports use `.js` extensions; the CLI runs through `node --import tsx`.
+Use **Node.js 24**, the exact pnpm version in `package.json`, strict TypeScript/ESM, ESLint, Prettier, and Vitest. TypeScript imports use `.js` extensions; the CLI runs through `node --import tsx`.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm check
 pnpm images plan --select all
 ```
+
+Dependency installation runs `prepare` to activate the Husky hooks in `.husky/`:
+
+- `pre-commit` runs `pnpm lint-staged`: staged JavaScript and TypeScript files run through `eslint --fix`, then `prettier --write`. Other supported staged files (including JSON, YAML, and Markdown) run through Prettier; unsupported formats are skipped. Fixes are automatically staged, and remaining lint errors block the commit.
+- `commit-msg` enforces Conventional Commits with `@commitlint/config-conventional`. Use messages such as `feat: add a base image`, `fix: validate parent digests`, or `chore: update tooling`.
+- `pre-push` runs the full unit test suite with `pnpm test`.
+
+Prettier uses `.prettierrc.json` (single quotes) and `.prettierignore` (generated output, dependencies, coverage, and the generated lockfile). Format specific files manually with `pnpm exec prettier --write <files>` or verify them with `pnpm exec prettier --check <files>`. Keep formatting limited to files you change. `pnpm check` runs type checking, ESLint, tests, and catalog validation; Prettier runs on staged files at commit time.
 
 For workflow and recipe checks on Linux:
 
