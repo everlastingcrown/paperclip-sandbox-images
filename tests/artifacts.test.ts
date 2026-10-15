@@ -27,6 +27,29 @@ const singlePlan = () => {
 };
 
 describe('OCI integrity', () => {
+  it('preserves BuildKit OCI artifact attestations with empty configs', () => {
+    const amd = temp();
+    const arm = temp();
+    const output = temp();
+    ociFixture(amd, 'amd64', 'artifact');
+    ociFixture(arm, 'arm64', 'artifact');
+    const before = inspectOci(amd, 'amd64');
+    expect(before.config.architecture).toBe('amd64');
+    expect(() => inspectOci(amd, 'arm64')).toThrow('platform');
+    mergeOci(
+      [
+        { dir: amd, arch: 'amd64' },
+        { dir: arm, arch: 'arm64' },
+      ],
+      output,
+    );
+    for (const hash of before.blobs)
+      expect(readFileSync(blobPath(output, hash))).toEqual(
+        readFileSync(blobPath(amd, hash)),
+      );
+    const index = JSON.parse(readFileSync(join(output, 'index.json'), 'utf8'));
+    expect(index.manifests).toHaveLength(4);
+  });
   it('inspects image bytes and preserves provenance manifests during merge', () => {
     const amd = temp();
     const arm = temp();

@@ -8,14 +8,14 @@ flowchart LR
   Harness --> Toolset[Toolset: exact capability version]
 ```
 
-The active catalog is intentionally empty. This foundation contains **no Dockerfiles or runnable images**. CI checks the repository now; image builds, runtime tests, and publication activate when recipes are registered.
+The active catalog includes [base runtime 1.0.0](images/base/runtime/README.md): Node.js 24, shared runtime tools, the Paperclip agent shim, and non-root defaults for AMD64 and ARM64. CI builds and tests registered recipes before publication.
 
 ## Layout
 
 | Location                       | Purpose                                                                      |
 | ------------------------------ | ---------------------------------------------------------------------------- |
 | `catalog/`                     | Active image definitions and JSON Schema                                     |
-| `images/base/`                 | Future shared runtime and hardening recipes                                  |
+| `images/base/`                 | Shared runtime and hardening recipes                                         |
 | `images/harnesses/`            | Future agent CLI recipes                                                     |
 | `images/toolsets/`             | Future capability recipes layered onto harnesses                             |
 | `src/`                         | TypeScript validation, dependency planning, building, testing, and promotion |
@@ -61,4 +61,4 @@ Enable Actions with package publishing allowed. The default GHCR namespace uses 
 
 Make published parent packages publicly readable for unauthenticated fork PR builds. GHCR packages may initially be private; configure visibility and repository access after their first release. Install/enable Renovate separately; `renovate.json` supplies its configuration.
 
-Protect `main` with Repository checks and, once images exist, both architecture candidate jobs. Real image and registry integration remain unverified until recipes are added and the workflow runs.
+Protect `main` with Repository checks and both architecture candidate jobs. Real image and registry integration require a successful workflow run.

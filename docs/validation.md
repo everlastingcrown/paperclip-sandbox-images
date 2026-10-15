@@ -20,4 +20,4 @@ SBOMs use CycloneDX. BuildKit emits provenance. Cosign signs and attests via Git
 
 The image is not the host security boundary. Paperclip/the provider must enforce host filesystem isolation, synchronization validation, management socket isolation, bridge authentication/routing, and egress policy outside the sandbox. Image smoke tests cannot prove these controls.
 
-With an empty catalog, tests verify infrastructure using metadata fixtures, synthetic OCI layouts, and mocked external tools. Real builds, architecture compatibility, scanning integration, GHCR promotion, and OIDC signing remain unverified until the first recipes run. Empty-catalog CI explicitly reports runtime checks as skipped.
+Unit tests verify infrastructure using metadata fixtures, synthetic OCI layouts, and mocked external tools. The active `base-1` recipe enables real builds and runtime checks on both architectures. Architecture compatibility, scanning integration, GHCR promotion, and OIDC signing require successful workflow runs; registering a recipe alone does not verify them. Empty-catalog CI explicitly reports runtime checks as skipped.

@@ -1,5 +1,25 @@
 {
   "$schema": "./schema.json",
   "schemaVersion": 1,
-  "images": []
+  "images": [
+    {
+      "id": "base-1",
+      "layer": "base",
+      "repository": "sandbox-base",
+      "capability": "base",
+      "version": "1.0.0",
+      "dockerfile": "images/base/runtime/Dockerfile",
+      "context": "images/base/runtime",
+      "args": {},
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "node",
+          "expected": "24.22.0",
+          "smoke": "set -eu; node -e 'const fs = require(\"node:fs\"); const path = \"/workspace/node-smoke.txt\"; fs.writeFileSync(path, \"paperclip\\n\"); if (fs.readFileSync(path, \"utf8\") !== \"paperclip\\n\") process.exit(1); fs.unlinkSync(path)'; mkdir /workspace/npm-smoke; cd /workspace/npm-smoke; printf '%s\\n' '{\"name\":\"paperclip-smoke\",\"version\":\"1.0.0\"}' > package.json; npm pack --offline --ignore-scripts >/dev/null; tar -tf paperclip-smoke-1.0.0.tgz | rg '^package/package.json$'"
+        }
+      ]
+    }
+  ]
 }
