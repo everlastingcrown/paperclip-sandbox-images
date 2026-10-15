@@ -17,7 +17,7 @@
         {
           "command": "node",
           "expected": "24.22.0",
-          "smoke": "node -e 'const fs = require(\"node:fs\"); const path = \"/workspace/node-smoke.txt\"; fs.writeFileSync(path, \"paperclip\\n\"); if (fs.readFileSync(path, \"utf8\") !== \"paperclip\\n\") process.exit(1); fs.unlinkSync(path)'"
+          "smoke": "set -eu; node -e 'const fs = require(\"node:fs\"); const path = \"/workspace/node-smoke.txt\"; fs.writeFileSync(path, \"paperclip\\n\"); if (fs.readFileSync(path, \"utf8\") !== \"paperclip\\n\") process.exit(1); fs.unlinkSync(path)'; mkdir /workspace/npm-smoke; cd /workspace/npm-smoke; printf '%s\\n' '{\"name\":\"paperclip-smoke\",\"version\":\"1.0.0\"}' > package.json; npm pack --offline --ignore-scripts >/dev/null; tar -tf paperclip-smoke-1.0.0.tgz | rg '^package/package.json$'"
         }
       ]
     }
