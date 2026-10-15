@@ -2,10 +2,10 @@
 
 ## Tags
 
-| Image | Version alias | `latest` selection |
-| --- | --- | --- |
-| Base | `sandbox-base:1.0.0` | Highest stable contract release |
-| Harness | `sandbox-codex:0.114.0` | Highest stable harness release |
+| Image   | Version alias                               | `latest` selection                             |
+| ------- | ------------------------------------------- | ---------------------------------------------- |
+| Base    | `sandbox-base:1.0.0`                        | Highest stable contract release                |
+| Harness | `sandbox-codex:0.114.0`                     | Highest stable harness release                 |
 | Toolset | `sandbox-python-codex:3.13.2-codex-0.114.0` | Highest stable capability, then stable harness |
 
 Immutable build tags append `-sha-<12-character-SHA>-<run-ID>-<attempt>`. Weekly rebuilds produce distinct tags even with unchanged source versions. GHCR does not enforce immutability; repository permissions protect these tags, and operators must not overwrite them.

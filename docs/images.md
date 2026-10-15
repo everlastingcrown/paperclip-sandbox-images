@@ -4,19 +4,19 @@
 
 ## Catalog contract
 
-| Field | Meaning |
-| --- | --- |
-| `id` | Unique stable identifier; also a Bake target |
-| `layer` | `base`, `harness`, or `toolset` |
-| `repository` | Registry repository name beginning with `sandbox-` |
-| `capability` | Primary capability name, e.g. `base`, `codex`, `python` |
-| `version` | Exact canonical SemVer without build metadata |
-| `parent` | Required for harness/toolset; absent for base |
-| `dockerfile`, `context` | Repository-relative recipe file and build context directory |
-| `args` | Pinned build arguments; never credentials |
-| `watch` | Additional files/directories that trigger rebuilds |
-| `platforms` | Both `linux/amd64` and `linux/arm64` |
-| `checks` | Command, expected `--version` value, and credential-free shell smoke command |
+| Field                   | Meaning                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `id`                    | Unique stable identifier; also a Bake target                                 |
+| `layer`                 | `base`, `harness`, or `toolset`                                              |
+| `repository`            | Registry repository name beginning with `sandbox-`                           |
+| `capability`            | Primary capability name, e.g. `base`, `codex`, `python`                      |
+| `version`               | Exact canonical SemVer without build metadata                                |
+| `parent`                | Required for harness/toolset; absent for base                                |
+| `dockerfile`, `context` | Repository-relative recipe file and build context directory                  |
+| `args`                  | Pinned build arguments; never credentials                                    |
+| `watch`                 | Additional files/directories that trigger rebuilds                           |
+| `platforms`             | Both `linux/amd64` and `linux/arm64`                                         |
+| `checks`                | Command, expected `--version` value, and credential-free shell smoke command |
 
 Harnesses depend on a base; toolsets depend on a harness. A repository identifies one layer/capability and, for toolsets, one harness family. Multiple capability and parent versions can coexist; output tags must be unique.
 

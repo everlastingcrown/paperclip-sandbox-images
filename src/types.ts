@@ -14,7 +14,10 @@ export interface Image {
   platforms: Platform[];
   checks: { command: string; expected: string; smoke: string }[];
 }
-export interface Catalog { schemaVersion: 1; images: Image[] }
+export interface Catalog {
+  schemaVersion: 1;
+  images: Image[];
+}
 export interface Plan {
   schemaVersion: 1;
   registry: string;
