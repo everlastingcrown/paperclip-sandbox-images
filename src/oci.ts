@@ -1,4 +1,10 @@
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  constants,
+  copyFileSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { digest } from './plan.js';
 
@@ -111,8 +117,19 @@ export function mergeOci(
   const manifests: Descriptor[] = [];
   for (const { dir, arch } of inputs) {
     const image = inspectOci(dir, arch);
-    for (const hash of image.blobs)
-      copyFileSync(blobPath(dir, hash), blobPath(out, hash));
+    for (const hash of image.blobs) {
+      const destination = blobPath(out, hash);
+      try {
+        // BuildKit blobs can be read-only and shared across architectures.
+        copyFileSync(blobPath(dir, hash), destination, constants.COPYFILE_EXCL);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+        if (digest(readFileSync(destination)) !== hash)
+          throw new Error(`OCI blob integrity failure: ${hash}`, {
+            cause: error,
+          });
+      }
+    }
     for (const descriptor of image.manifests) {
       manifests.push(
         descriptor.digest === image.imageDigest

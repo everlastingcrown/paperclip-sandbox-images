@@ -1,4 +1,10 @@
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { blobPath, inspectOci, mergeOci } from '../src/oci.js';
@@ -27,6 +33,37 @@ const singlePlan = () => {
 };
 
 describe('OCI integrity', () => {
+  it('merges shared read-only blobs and can reuse an existing release layout', () => {
+    const inputs = ['amd64', 'arm64'].map((arch) => {
+      const dir = temp();
+      ociFixture(dir, arch, 'artifact');
+      for (const hash of inspectOci(dir, arch).blobs)
+        chmodSync(blobPath(dir, hash), 0o444);
+      return { dir, arch };
+    });
+    const output = temp();
+    const hash = mergeOci(inputs, output);
+    expect(mergeOci(inputs, output)).toBe(hash);
+    for (const { dir, arch } of inputs)
+      for (const blob of inspectOci(dir, arch).blobs)
+        expect(readFileSync(blobPath(output, blob))).toEqual(
+          readFileSync(blobPath(dir, blob)),
+        );
+    const index = JSON.parse(readFileSync(join(output, 'index.json'), 'utf8'));
+    expect(index.manifests).toHaveLength(4);
+  });
+  it('rejects corrupted blobs in an existing release layout', () => {
+    const dir = temp();
+    const output = temp();
+    ociFixture(dir);
+    const inputs = [{ dir, arch: 'amd64' }];
+    mergeOci(inputs, output);
+    const hash = inspectOci(dir, 'amd64').imageDigest;
+    writeFileSync(blobPath(output, hash), '{}');
+    expect(() => mergeOci(inputs, output)).toThrow(
+      'OCI blob integrity failure',
+    );
+  });
   it('preserves BuildKit OCI artifact attestations with empty configs', () => {
     const amd = temp();
     const arm = temp();
