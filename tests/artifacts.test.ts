@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { blobPath, inspectOci, mergeOci } from '../src/oci.js';
 import { publish } from '../src/publish.js';
+import { digest } from '../src/plan.js';
 import { assertTested, runtimeArgs, testImages } from '../src/test-images.js';
 import type { Runner } from '../src/command.js';
 import {
@@ -32,6 +33,18 @@ const singlePlan = () => {
   return planFor(c);
 };
 
+// Read the image Skopeo selects from the OCI layout's top-level catalog.
+function releaseIndex(dir: string): string {
+  const layout = JSON.parse(readFileSync(join(dir, 'index.json'), 'utf8'));
+  expect(layout.manifests).toHaveLength(1);
+  const descriptor = layout.manifests[0];
+  expect(descriptor.mediaType).toBe('application/vnd.oci.image.index.v1+json');
+  const bytes = readFileSync(blobPath(dir, descriptor.digest));
+  expect(bytes.length).toBe(descriptor.size);
+  expect(digest(bytes)).toBe(descriptor.digest);
+  return bytes.toString();
+}
+
 describe('OCI integrity', () => {
   it('merges shared read-only blobs and can reuse an existing release layout', () => {
     const inputs = ['amd64', 'arm64'].map((arch) => {
@@ -49,7 +62,7 @@ describe('OCI integrity', () => {
         expect(readFileSync(blobPath(output, blob))).toEqual(
           readFileSync(blobPath(dir, blob)),
         );
-    const index = JSON.parse(readFileSync(join(output, 'index.json'), 'utf8'));
+    const index = JSON.parse(releaseIndex(output));
     expect(index.manifests).toHaveLength(4);
   });
   it('rejects corrupted blobs in an existing release layout', () => {
@@ -84,7 +97,7 @@ describe('OCI integrity', () => {
       expect(readFileSync(blobPath(output, hash))).toEqual(
         readFileSync(blobPath(amd, hash)),
       );
-    const index = JSON.parse(readFileSync(join(output, 'index.json'), 'utf8'));
+    const index = JSON.parse(releaseIndex(output));
     expect(index.manifests).toHaveLength(4);
   });
   it('inspects image bytes and preserves provenance manifests during merge', () => {
@@ -101,10 +114,10 @@ describe('OCI integrity', () => {
       ],
       output,
     );
-    const index = JSON.parse(
-      readFileSync(join(output, 'index.json'), 'utf8'),
-    ) as { manifests: { digest: string }[] };
-    expect(hash).toMatch(/^sha256:/);
+    const index = JSON.parse(releaseIndex(output)) as {
+      manifests: { digest: string }[];
+    };
+    expect(hash).toBe(digest(releaseIndex(output)));
     expect(index.manifests).toHaveLength(4);
     expect(index.manifests.some((m) => m.digest === before.imageDigest)).toBe(
       true,
@@ -255,7 +268,7 @@ describe('publication', () => {
     testedFixture(plan, out);
     const run = vi.fn<Runner>((command, args) =>
       command === 'skopeo' && args[0] === 'inspect'
-        ? readFileSync(join(out, 'release', 'base-1', 'index.json'), 'utf8')
+        ? releaseIndex(join(out, 'release', 'base-1'))
         : '',
     );
     publish(plan, out, run);
@@ -284,7 +297,7 @@ describe('publication', () => {
     const run = vi.fn<Runner>((command, args) => {
       if (command === 'cosign') throw new Error('signing failed');
       return args[0] === 'inspect'
-        ? readFileSync(join(out, 'release', 'base-1', 'index.json'), 'utf8')
+        ? releaseIndex(join(out, 'release', 'base-1'))
         : '';
     });
     expect(() => publish(plan, out, run)).toThrow('signing failed');
@@ -299,7 +312,7 @@ describe('publication', () => {
     testedFixture(plan, out);
     const run = vi.fn<Runner>((command, args) =>
       command === 'skopeo' && args[0] === 'inspect'
-        ? readFileSync(join(out, 'release', 'codex-old', 'index.json'), 'utf8')
+        ? releaseIndex(join(out, 'release', 'codex-old'))
         : '',
     );
     publish(plan, out, run);

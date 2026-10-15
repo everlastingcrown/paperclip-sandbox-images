@@ -138,15 +138,23 @@ export function mergeOci(
       );
     }
   }
-  const index = JSON.stringify({
-    schemaVersion: 2,
-    mediaType: 'application/vnd.oci.image.index.v1+json',
-    manifests,
-  });
-  writeFileSync(join(out, 'index.json'), index);
+  const mediaType = 'application/vnd.oci.image.index.v1+json';
+  const index = JSON.stringify({ schemaVersion: 2, mediaType, manifests });
+  const hash = digest(index);
+  writeFileSync(blobPath(out, hash), index);
+  // The layout index is a catalog of images. Skopeo selects its sole entry,
+  // which must be the complete multi-platform index, including attestations.
+  writeFileSync(
+    join(out, 'index.json'),
+    JSON.stringify({
+      schemaVersion: 2,
+      mediaType,
+      manifests: [{ mediaType, digest: hash, size: Buffer.byteLength(index) }],
+    }),
+  );
   writeFileSync(
     join(out, 'oci-layout'),
     JSON.stringify({ imageLayoutVersion: '1.0.0' }),
   );
-  return digest(index);
+  return hash;
 }
