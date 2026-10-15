@@ -17,7 +17,7 @@ export const planFor = (data = fixture()): Plan =>
 export function ociFixture(
   dir: string,
   arch = 'amd64',
-  attestation = false,
+  attestation: boolean | 'artifact' = false,
 ): void {
   mkdirSync(join(dir, 'blobs', 'sha256'), { recursive: true });
   function blob(data: unknown, mediaType: string): Descriptor {
@@ -43,12 +43,30 @@ export function ociFixture(
     { ...image, platform: { os: 'linux', architecture: arch } },
   ];
   if (attestation) {
+    const artifact = attestation === 'artifact';
     const config = blob(
-      { architecture: 'unknown', os: 'unknown', config: {} },
-      'application/vnd.oci.image.config.v1+json',
+      artifact ? {} : { architecture: 'unknown', os: 'unknown', config: {} },
+      artifact
+        ? 'application/vnd.oci.empty.v1+json'
+        : 'application/vnd.oci.image.config.v1+json',
     );
     manifests.push({
-      ...blob({ schemaVersion: 2, mediaType, config, layers: [] }, mediaType),
+      ...blob(
+        {
+          schemaVersion: 2,
+          mediaType,
+          config,
+          layers: [],
+          ...(artifact
+            ? {
+                artifactType:
+                  'application/vnd.docker.attestation.manifest.v1+json',
+                subject: image,
+              }
+            : {}),
+        },
+        mediaType,
+      ),
       platform: { os: 'unknown', architecture: 'unknown' },
     });
   }

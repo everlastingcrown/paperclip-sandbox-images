@@ -12,6 +12,7 @@ export interface Descriptor {
 interface Manifest {
   schemaVersion: number;
   mediaType?: string;
+  artifactType?: string;
   manifests?: Descriptor[];
   config?: Descriptor;
   layers?: Descriptor[];
@@ -71,7 +72,17 @@ export function inspectOci(dir: string, arch: string): OciImage {
     ) as OciImage['config'];
     manifest.layers.forEach(read);
     manifests.push(descriptor);
-    if (config.architecture !== 'unknown') {
+    // BuildKit's OCI artifact attestations use an empty config instead of the
+    // legacy unknown/unknown image config. They are evidence, not runnable images.
+    const artifactAttestation =
+      manifest.artifactType ===
+        'application/vnd.docker.attestation.manifest.v1+json' &&
+      manifest.config.mediaType === 'application/vnd.oci.empty.v1+json' &&
+      descriptor.platform?.os === 'unknown' &&
+      descriptor.platform.architecture === 'unknown' &&
+      config.architecture === undefined &&
+      config.os === undefined;
+    if (!artifactAttestation && config.architecture !== 'unknown') {
       if (config.architecture !== arch || config.os !== 'linux')
         throw new Error('OCI platform mismatch');
       runnable.push({ hash: descriptor.digest, config });
