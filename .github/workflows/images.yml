@@ -1,0 +1,226 @@
+name: Images
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'Comma-separated catalog IDs (includes descendants), or all'
+        default: all
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Keep trusted releases serialized, including builds and alias promotion.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('images-pr-{0}', github.event.pull_request.number) || 'images-release' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE_REGISTRY: ${{ vars.IMAGE_REGISTRY || 'ghcr.io/everlastingcrown' }}
+
+jobs:
+  checks:
+    name: Repository checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.15.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: node scripts/install-tools.ts checks
+      - run: actionlint
+      - run: pnpm images lint-recipes
+
+  plan:
+    name: Plan affected images
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      has-images: ${{ steps.plan.outputs.has-images }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.15.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Determine affected entries
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+          SELECTION: ${{ inputs.images }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT" == schedule ]]; then
+            pnpm images plan --select all
+          elif [[ "$EVENT" == workflow_dispatch ]]; then
+            pnpm images plan --select "$SELECTION"
+          elif [[ "$EVENT" == pull_request ]]; then
+            pnpm images plan --base "$PR_BASE"
+          elif [[ "$PUSH_BASE" =~ ^0+$ ]]; then
+            pnpm images plan --select all
+          else
+            pnpm images plan --base "$PUSH_BASE"
+          fi
+      - name: Resolve unchanged parents
+        if: steps.plan.outputs.has-images == 'true'
+        run: |
+          bash scripts/install-skopeo.sh
+          pnpm images resolve-parents
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: image-plan
+          path: out/plan.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Empty catalog summary
+        if: steps.plan.outputs.has-images != 'true'
+        run: echo 'No affected images. Runtime checks skipped; no image compatibility claim is made.' >> "$GITHUB_STEP_SUMMARY"
+
+  candidate:
+    name: Build and test (${{ matrix.arch }})
+    needs: plan
+    if: needs.plan.outputs.has-images == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.15.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: image-plan
+          path: out
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+        with:
+          version: v0.38.0
+          driver-opts: image=moby/buildkit:v0.34.0@sha256:b059f8d7226d0b326bc871af489a5dddf65e36af4d20d14251b072974d9ee87c
+      - run: |
+          bash scripts/install-skopeo.sh
+          node scripts/install-tools.ts images
+      - name: Build OCI candidates
+        env:
+          PLATFORM: linux/${{ matrix.arch }}
+          REFRESH: ${{ github.event_name == 'schedule' }}
+        run: |
+          if [[ "$REFRESH" == true ]]; then
+            pnpm images build --platform "$PLATFORM" --refresh
+          else
+            pnpm images build --platform "$PLATFORM"
+          fi
+      - name: Test and scan candidates
+        env:
+          PLATFORM: linux/${{ matrix.arch }}
+        run: pnpm images test --platform "$PLATFORM"
+      - name: Package candidates
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: tar -cf "out/candidate-$ARCH.tar" -C out "$ARCH"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: candidate-${{ matrix.arch }}
+          path: out/candidate-${{ matrix.arch }}.tar
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Keep scan reports on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: failed-reports-${{ matrix.arch }}
+          path: out/${{ matrix.arch }}/*-reports/
+          retention-days: 7
+
+  publish:
+    name: Publish validated images
+    needs: [plan, candidate]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.plan.outputs.has-images == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    env:
+      COSIGN_CERTIFICATE_IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/images.yml@refs/heads/main
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.15.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Configure isolated registry credentials
+        run: |
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/paperclip-docker" >> "$GITHUB_ENV"
+          echo "REGISTRY_AUTH_FILE=$RUNNER_TEMP/paperclip-docker/config.json" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: image-plan
+          path: out
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: candidate-*
+          merge-multiple: true
+          path: out
+      - name: Unpack tested candidates
+        run: |
+          tar -xf out/candidate-amd64.tar -C out
+          tar -xf out/candidate-arm64.tar -C out
+      - run: |
+          bash scripts/install-skopeo.sh
+          node scripts/install-tools.ts publish
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish, sign, verify, and advance aliases
+        run: pnpm images publish
+      - name: Preserve release metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-metadata
+          path: out/release/release.json
+          if-no-files-found: warn
+          retention-days: 90

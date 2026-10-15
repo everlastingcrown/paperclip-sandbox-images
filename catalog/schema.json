@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Paperclip sandbox image catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "images"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "images": { "type": "array", "items": { "$ref": "#/definitions/image" } }
+  },
+  "definitions": {
+    "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[a-zA-Z0-9_./-]+$" },
+    "version": { "type": "string", "minLength": 1, "maxLength": 60 },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "layer", "repository", "capability", "version", "dockerfile", "context", "args", "watch", "platforms", "checks"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "maxLength": 80 },
+        "layer": { "enum": ["base", "harness", "toolset"] },
+        "repository": { "type": "string", "pattern": "^sandbox-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "capability": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "version": { "$ref": "#/definitions/version" },
+        "parent": { "type": "string" },
+        "dockerfile": { "$ref": "#/definitions/path" },
+        "context": { "$ref": "#/definitions/path" },
+        "args": { "type": "object", "additionalProperties": { "type": "string" }, "propertyNames": { "pattern": "^[A-Z][A-Z0-9_]*$" } },
+        "watch": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/definitions/path" } },
+        "platforms": { "type": "array", "uniqueItems": true, "minItems": 2, "maxItems": 2, "items": { "enum": ["linux/amd64", "linux/arm64"] } },
+        "checks": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false,
+          "required": ["command", "expected", "smoke"],
+          "properties": {
+            "command": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
+            "expected": { "type": "string", "minLength": 1 },
+            "smoke": { "type": "string", "minLength": 1 }
+          }
+        } }
+      }
+    }
+  }
+}

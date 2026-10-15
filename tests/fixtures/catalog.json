@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "images": [
+    {
+      "id": "base-1", "layer": "base", "repository": "sandbox-base", "capability": "base", "version": "1.0.0",
+      "dockerfile": "images/base/runtime/Dockerfile", "context": "images/base/runtime",
+      "args": { "NODE_VERSION": "24.15.0" }, "watch": ["shared/paperclip-shim"],
+      "platforms": ["linux/amd64", "linux/arm64"], "checks": []
+    },
+    {
+      "id": "codex-old", "layer": "harness", "repository": "sandbox-codex", "capability": "codex", "version": "0.99.0", "parent": "base-1",
+      "dockerfile": "images/harnesses/codex/Dockerfile", "context": "images/harnesses/codex",
+      "args": { "CODEX_VERSION": "0.99.0" }, "watch": [], "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [{ "command": "codex", "expected": "0.99.0", "smoke": "codex --help >/dev/null" }]
+    },
+    {
+      "id": "codex-new", "layer": "harness", "repository": "sandbox-codex", "capability": "codex", "version": "0.114.0", "parent": "base-1",
+      "dockerfile": "images/harnesses/codex/Dockerfile", "context": "images/harnesses/codex",
+      "args": { "CODEX_VERSION": "0.114.0" }, "watch": [], "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [{ "command": "codex", "expected": "0.114.0", "smoke": "codex --help >/dev/null" }]
+    },
+    {
+      "id": "python-old-codex", "layer": "toolset", "repository": "sandbox-python-codex", "capability": "python", "version": "3.13.2", "parent": "codex-old",
+      "dockerfile": "images/toolsets/python/Dockerfile", "context": "images/toolsets/python",
+      "args": { "PYTHON_VERSION": "3.13.2" }, "watch": [], "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [{ "command": "python", "expected": "3.13.2", "smoke": "python -c 'print(1 + 1)'" }]
+    },
+    {
+      "id": "python-new-codex", "layer": "toolset", "repository": "sandbox-python-codex", "capability": "python", "version": "3.13.2", "parent": "codex-new",
+      "dockerfile": "images/toolsets/python/Dockerfile", "context": "images/toolsets/python",
+      "args": { "PYTHON_VERSION": "3.13.2" }, "watch": [], "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [{ "command": "python", "expected": "3.13.2", "smoke": "python -c 'print(1 + 1)'" }]
+    }
+  ]
+}

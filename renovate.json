@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":pinDevDependencies"],
+  "pinDigests": true,
+  "rangeStrategy": "pin",
+  "automerge": false,
+  "lockFileMaintenance": { "enabled": true },
+  "packageRules": [
+    { "matchManagers": ["github-actions"], "groupName": "GitHub Actions" },
+    { "matchManagers": ["npm"], "matchPackageNames": ["typescript", "typescript-eslint", "eslint", "@eslint/js"], "groupName": "TypeScript and lint tooling" }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.*\\.ya?ml$/"],
+      "matchStrings": ["driver-opts: image=(?<depName>[^: @\\s]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^images/.*Dockerfile$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\s+(?:ARG|ENV) [A-Z_]+=(?<currentValue>[^\\s]+)"]
+    }
+  ]
+}
