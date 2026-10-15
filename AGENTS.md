@@ -2,7 +2,7 @@
 
 ## Purpose and structure
 
-Build and publish Docker images for Paperclip agent sandboxes: **base → harness → toolset**. The active catalog is intentionally empty; there are no Dockerfiles yet. Metadata fixtures are examples, not buildable images.
+Build and publish Docker images for Paperclip agent sandboxes: **base → harness → toolset**. The active catalog includes `base-1`, the shared Node.js 24 runtime in `images/base/runtime/`. Metadata fixtures are examples, not buildable images.
 
 - `catalog/images.json`: sole active catalog; `schema.json` defines its format.
 - `images/{base,harnesses,toolsets}/`: recipe families, supporting several maintained versions.

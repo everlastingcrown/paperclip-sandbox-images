@@ -1,0 +1,6 @@
+*
+!agent-shim/
+!agent-shim/go.mod
+!agent-shim/main.go
+!agent-shim/runtime_command.go
+!agent-shim/LICENSE
