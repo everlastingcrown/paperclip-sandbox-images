@@ -20,6 +20,72 @@
           "smoke": "set -eu; node -e 'const fs = require(\"node:fs\"); const path = \"/workspace/node-smoke.txt\"; fs.writeFileSync(path, \"paperclip\\n\"); if (fs.readFileSync(path, \"utf8\") !== \"paperclip\\n\") process.exit(1); fs.unlinkSync(path)'; mkdir /workspace/npm-smoke; cd /workspace/npm-smoke; printf '%s\\n' '{\"name\":\"paperclip-smoke\",\"version\":\"1.0.0\"}' > package.json; npm pack --offline --ignore-scripts >/dev/null; tar -tf paperclip-smoke-1.0.0.tgz | rg '^package/package.json$'"
         }
       ]
+    },
+    {
+      "id": "claude-2-1-300",
+      "layer": "harness",
+      "repository": "sandbox-claude",
+      "capability": "claude",
+      "version": "2.1.300",
+      "parent": "base-1",
+      "dockerfile": "images/harnesses/claude/Dockerfile",
+      "context": "images/harnesses/claude",
+      "args": {
+        "CLAUDE_VERSION": "2.1.300"
+      },
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "claude-code",
+          "expected": "2.1.300",
+          "smoke": "set -eu; test \"$(readlink -f \"$(command -v claude-code)\")\" = \"$(readlink -f \"$(command -v claude)\")\"; mkdir /workspace/claude-smoke; cd /workspace/claude-smoke; claude-code mcp add-json --scope project paperclip-smoke '{\"type\":\"stdio\",\"command\":\"node\",\"args\":[\"--version\"]}'; node -e 'const fs = require(\"node:fs\"); const server = JSON.parse(fs.readFileSync(\".mcp.json\", \"utf8\")).mcpServers[\"paperclip-smoke\"]; if (server.type !== \"stdio\" || server.command !== \"node\" || JSON.stringify(server.args) !== JSON.stringify([\"--version\"])) process.exit(1)'"
+        }
+      ]
+    },
+    {
+      "id": "codex-0-162-1",
+      "layer": "harness",
+      "repository": "sandbox-codex",
+      "capability": "codex",
+      "version": "0.162.1",
+      "parent": "base-1",
+      "dockerfile": "images/harnesses/codex/Dockerfile",
+      "context": "images/harnesses/codex",
+      "args": {
+        "CODEX_VERSION": "0.162.1"
+      },
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "codex",
+          "expected": "0.162.1",
+          "smoke": "set -eu; codex completion bash > /workspace/codex-completion.bash; test -s /workspace/codex-completion.bash; bash -n /workspace/codex-completion.bash; rg 'complete .*codex' /workspace/codex-completion.bash"
+        }
+      ]
+    },
+    {
+      "id": "opencode-1-19-0",
+      "layer": "harness",
+      "repository": "sandbox-opencode",
+      "capability": "opencode",
+      "version": "1.19.0",
+      "parent": "base-1",
+      "dockerfile": "images/harnesses/opencode/Dockerfile",
+      "context": "images/harnesses/opencode",
+      "args": {
+        "OPENCODE_VERSION": "1.19.0"
+      },
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "opencode",
+          "expected": "1.19.0",
+          "smoke": "set -eu; OPENCODE_DISABLE_MODELS_FETCH=true opencode debug paths > /workspace/opencode-paths.txt; rg '^home +/home/paperclip$' /workspace/opencode-paths.txt; rg '^config +/home/paperclip/.config/opencode$' /workspace/opencode-paths.txt; test -d /home/paperclip/.local/share/opencode"
+        }
+      ]
     }
   ]
 }

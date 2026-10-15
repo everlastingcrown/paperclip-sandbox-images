@@ -13,6 +13,8 @@ The `base-1` catalog entry publishes `sandbox-base:1.0.0` for Linux AMD64 and AR
 
 The official Node image's existing UID/GID 1000 account is renamed to preserve the Paperclip contract. Node and npm are already on PATH; launch requires no profile changes or runtime installers. Harness images add their agent CLI using `FROM paperclip-parent`.
 
+The active [harness catalog](../../harnesses/README.md) adds Claude, Codex, and OpenCode on this base. Select `base-1` to rebuild the base and all three descendants together; select a harness ID to reuse a published base.
+
 The provider mounts a readable `/run/paperclip/runtime-command.json`, for example:
 
 ```json
