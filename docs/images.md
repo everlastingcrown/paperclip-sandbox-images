@@ -1,6 +1,6 @@
 # Authoring images
 
-`catalog/images.json` is the only active catalog. `tests/fixtures/catalog.json` illustrates maintained versions and a base → harness → Python dependency chain. Its paths intentionally do not exist and CI never builds it.
+`catalog/images.json` is the only active catalog. `tests/fixtures/catalog.json` illustrates maintained versions and a base → harness → Python dependency chain. Its metadata is illustrative and CI never builds it.
 
 ## Catalog contract
 
