@@ -147,6 +147,9 @@ try {
       for (const file of [
         'scripts/runtime-contract.sh',
         'scripts/install-skopeo.sh',
+        'images/toolsets/expo/install-android.sh',
+        'images/toolsets/expo/smoke.sh',
+        'images/toolsets/expo/paperclip-expo',
       ])
         if (existsSync(file)) run('shellcheck', [file]);
       break;

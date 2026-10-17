@@ -1,5 +1,7 @@
 # Toolset images
 
-Reserve a directory per capability family here. Future recipes extend a specific harness through `paperclip-parent` and install a versioned capability or bundle of pinned tools. Supported combinations are explicit catalog entries.
+Each capability family extends a specific harness through `paperclip-parent` and installs a versioned capability or bundle of pinned tools. Supported combinations are explicit catalog entries.
 
-See [image authoring](../../docs/images.md). No toolset is implemented yet.
+The [Expo toolset](expo/README.md) supplies Expo web development and Playwright on AMD64/ARM64, plus Android build tooling on AMD64, over the Codex harness.
+
+See [image authoring](../../docs/images.md).
