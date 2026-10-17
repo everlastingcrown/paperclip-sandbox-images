@@ -4,7 +4,7 @@ Follow [Paperclip's sandbox requirements](https://github.com/paperclipai/papercl
 
 ## Runtime tests
 
-Adopt UID/GID `1000:1000`, `WORKDIR /workspace`, home `/home/paperclip`, and shim command file `/run/paperclip/runtime-command.json`. Supply `sh`, Node.js 24+, `tar`, `git`, `rg`, `tini`, and `paperclip-agent-shim` directly on PATH. Derived recipes preserve the init/shim defaults.
+Adopt UID/GID `1000:1000`, `WORKDIR /workspace`, home `/home/paperclip`, and shim command file `/run/paperclip/runtime-command.json`. Supply `sh`, Node.js 24+, `tar`, `gh`, `git`, `rg`, `tini`, and `paperclip-agent-shim` directly on PATH. Verify `gh --version` offline as the runtime user. Derived recipes preserve the init/shim defaults.
 
 Tests use a read-only root filesystem, dropped capabilities, no privilege escalation, bounded resources, and no network. Writable mounts provide workspace, home/cache, and temporary storage. Checks cover writes, archive round-trips, declared CLI versions, and functional smoke commands. A synthetic shim command tests launch, argument delivery, SIGTERM forwarding, and preservation of child exit status.
 
