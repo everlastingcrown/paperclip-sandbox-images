@@ -48,7 +48,7 @@ Prebuild modifies the project's native Android directory; review generated chang
 
 ## Validation
 
-`paperclip-expo --version` reports the bundle release. `paperclip-expo check` compiles/runs a host C program and Java 17 class, exercises Python SQLite, serves a local page, launches Chromium, clicks its UI, and captures a screenshot. On AMD64 it also checks the SDK platform/license, runs AAPT2/CMake/Ninja, and compiles an Android ARM64 object with the NDK. The catalog repeats these checks offline under the restricted runtime contract and inherits Codex's smoke check. Full project tests require a checkout and its dependencies.
+`paperclip-expo --version` reports the bundle release. `paperclip-expo check` compiles a host C object, compiles/runs a Java 17 class, exercises Python SQLite, serves a local page, launches Chromium, clicks its UI, and captures a screenshot. Generated native binaries are not executed because runtime tmpfs mounts are `noexec`. On AMD64 it also checks the SDK platform/license, runs AAPT2/CMake/Ninja, and compiles an Android ARM64 object with the NDK. The catalog repeats these checks offline under the restricted runtime contract and inherits Codex's smoke check. Full project tests require a checkout and its dependencies.
 
 To build the entire chain without relying on previously published parents:
 

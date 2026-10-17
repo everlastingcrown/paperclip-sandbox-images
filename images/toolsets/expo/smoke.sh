@@ -9,8 +9,10 @@ cd "$work"
 # Maven artifacts, app dependencies, or credentials.
 python3 -c 'import sqlite3; db = sqlite3.connect(":memory:"); assert db.execute("select 1").fetchone() == (1,)'
 printf '%s\n' 'int main(void) { return 0; }' > smoke.c
-cc smoke.c -o smoke
-./smoke
+# Runtime tmpfs mounts are noexec; validate native compilation without trying
+# to execute a generated binary from writable storage.
+cc -c smoke.c -o smoke.o
+test -s smoke.o
 printf '%s\n' 'class Smoke { public static void main(String[] args) { if (Runtime.version().feature() != 17) throw new AssertionError(); } }' > Smoke.java
 javac Smoke.java
 java -cp . Smoke
