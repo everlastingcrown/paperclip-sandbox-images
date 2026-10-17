@@ -4,9 +4,10 @@ set -eu
 test "$(id -u)" = 1000
 test "$(id -g)" = 1000
 test "$PWD" = /workspace
-for command in sh node tar git rg tini paperclip-agent-shim; do
+for command in sh node tar gh git rg tini paperclip-agent-shim; do
   command -v "$command" >/dev/null
 done
+gh --version
 node -e 'if (Number(process.versions.node.split(".")[0]) < 24) process.exit(1)'
 
 for directory in /workspace "$HOME" "$XDG_CACHE_HOME" "$TMPDIR"; do

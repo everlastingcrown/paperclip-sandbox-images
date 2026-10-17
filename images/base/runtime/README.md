@@ -6,7 +6,7 @@ The `base-1` catalog entry publishes `sandbox-base:1.0.0` for Linux AMD64 and AR
 
 - Debian Bookworm with Node.js 24.22.0 and npm from the digest-pinned official Node image.
 - npm's bundled `brace-expansion` and `undici` dependencies receive compatible patch releases 5.0.11 and 6.28.1, downloaded with verified SHA-256 checksums. These fix CVE-2026-102276, CVE-2026-102278, and CVE-2026-19534 while upstream npm still bundles affected versions. Update versions and checksums together; remove the overrides once the pinned Node image includes fixed dependencies. The offline smoke check exercises `npm pack`.
-- Bash/POSIX shell, CA certificates, coreutils, curl, git, ripgrep, tar, and tini. Distribution packages receive security updates at build time; APT versions intentionally follow Bookworm updates.
+- Bash/POSIX shell, CA certificates, coreutils, curl, GitHub CLI (`gh`), git, ripgrep, tar, and tini. Distribution packages receive security updates at build time; APT versions intentionally follow Bookworm updates. The offline runtime contract checks `gh --version`; supply GitHub credentials per run when authenticated operations are needed.
 - A statically compiled `paperclip-agent-shim`, built with digest-pinned Go 1.27.2. The compiler is confined to the build stage. BuildKit cross-compiles the shim for the target architecture without downloading Go modules.
 - User/group `paperclip` (`1000:1000`), home `/home/paperclip`, workspace `/workspace`, cache `/home/paperclip/.cache`, and temporary directory `/tmp`. Home, cache, and workspace are owned by the runtime user.
 - Entrypoint `/usr/bin/tini --` and default command `/usr/local/bin/paperclip-agent-shim`.

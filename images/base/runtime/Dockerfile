@@ -17,7 +17,7 @@ LABEL org.opencontainers.image.title="Paperclip sandbox base runtime" \
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
-        bash ca-certificates coreutils curl git ripgrep tar tini \
+        bash ca-certificates coreutils curl gh git ripgrep tar tini \
     && rm -rf /var/lib/apt/lists/* \
     && groupmod --new-name paperclip node \
     && usermod --login paperclip --home /home/paperclip --move-home --shell /bin/bash node \
