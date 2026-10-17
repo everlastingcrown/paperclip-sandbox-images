@@ -86,6 +86,47 @@
           "smoke": "set -eu; OPENCODE_DISABLE_MODELS_FETCH=true opencode debug paths > /workspace/opencode-paths.txt; rg '^home +/home/paperclip$' /workspace/opencode-paths.txt; rg '^config +/home/paperclip/.config/opencode$' /workspace/opencode-paths.txt; test -d /home/paperclip/.local/share/opencode"
         }
       ]
+    },
+    {
+      "id": "expo-1-codex",
+      "layer": "toolset",
+      "repository": "sandbox-expo-codex",
+      "capability": "expo",
+      "version": "1.0.0",
+      "parent": "codex-0-162-1",
+      "dockerfile": "images/toolsets/expo/Dockerfile",
+      "context": "images/toolsets/expo",
+      "args": {
+        "TOOLSET_VERSION": "1.0.0",
+        "ANDROID_COMMANDLINE_BUILD": "13114758",
+        "ANDROID_COMMANDLINE_SHA256": "7ec965280a073311c339e571cd5de778b9975026cfcbe79f2b1cdcb1e15317ee",
+        "ANDROID_PLATFORM": "36",
+        "ANDROID_BUILD_TOOLS": "36.0.0",
+        "ANDROID_NDK": "27.1.12297006",
+        "ANDROID_CMAKE": "3.22.1",
+        "NDK_SETUPTOOLS_VERSION": "80.10.2",
+        "NDK_SETUPTOOLS_SHA256": "95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173",
+        "NDK_SETUPTOOLS_URL": "https://files.pythonhosted.org/packages/94/b8/f1f62a5e3c0ad2ff1d189590bfa4c46b4f3b6e49cef6f26c6ee4e575394d/setuptools-80.10.2-py3-none-any.whl"
+      },
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "paperclip-expo",
+          "expected": "1.0.0",
+          "smoke": "paperclip-expo check"
+        },
+        {
+          "command": "playwright",
+          "expected": "1.61.0",
+          "smoke": "set -eu; test \"$PLAYWRIGHT_BROWSERS_PATH\" = /opt/playwright-browsers; test -r /opt/expo-tools/node_modules/playwright-core/browsers.json"
+        },
+        {
+          "command": "serve",
+          "expected": "14.2.6",
+          "smoke": "set -eu; serve --help | rg -- '--listen'"
+        }
+      ]
     }
   ]
 }

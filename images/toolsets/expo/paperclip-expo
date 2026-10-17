@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+case "${1:-}" in
+  --version) cat /opt/expo-tools/VERSION ;;
+  check) exec sh /opt/expo-tools/smoke.sh ;;
+  *) echo 'Usage: paperclip-expo <--version|check>' >&2; exit 2 ;;
+esac
