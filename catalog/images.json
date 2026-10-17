@@ -103,7 +103,10 @@
         "ANDROID_PLATFORM": "36",
         "ANDROID_BUILD_TOOLS": "36.0.0",
         "ANDROID_NDK": "27.1.12297006",
-        "ANDROID_CMAKE": "3.22.1"
+        "ANDROID_CMAKE": "3.22.1",
+        "NDK_SETUPTOOLS_VERSION": "78.1.1",
+        "NDK_SETUPTOOLS_SHA256": "c3a9c4211ff4c309edb8b8c4f1cbfa7ae324c4ba9f91ff254e3d305b9fd54561",
+        "NDK_SETUPTOOLS_URL": "https://files.pythonhosted.org/packages/90/99/158ad0609729111163fc1f674a5a42f2605371a4cf036d0441070e2f7455/setuptools-78.1.1-py3-none-any.whl"
       },
       "watch": [],
       "platforms": ["linux/amd64", "linux/arm64"],

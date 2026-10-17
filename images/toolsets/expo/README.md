@@ -11,9 +11,11 @@
 
 Expo CLI, React Native, TypeScript, and test frameworks come from each project's dependencies. Choose projects compatible with the tool versions above; the bundle does not select or upgrade a project's Expo SDK version. Keep the project's Playwright version at 1.61.0 to match the baked Chromium revision. Different Android SDK/NDK requirements or Playwright browser revisions require a corresponding toolset update.
 
-Google's Linux NDK host toolchain uses `linux-x86_64` binaries. Use an AMD64 worker for Android builds and Gradle Android native checks; the ARM64 image supports web development and browser tests. Android command-line tools 19.0 use the fixed build-13114758 URL and a verified SHA-256. SDK Manager installs the explicitly versioned packages and accepts their licenses during image construction. Use each project's Gradle wrapper rather than a global Gradle installation.
+Google's Linux NDK host toolchain uses `linux-x86_64` binaries. Use an AMD64 worker for Android builds and Gradle Android native checks; the ARM64 image supports web development and browser tests. Android command-line tools 19.0 use the fixed build-13114758 URL and a verified SHA-256. SDK Manager installs the explicitly versioned packages and accepts their licenses during image construction, then is removed with its Java libraries. The runtime contains the fixed SDK packages without the installer. Use each project's Gradle wrapper rather than a global Gradle installation.
 
 Debian packages track distribution security updates, as in the base image. The tools lockfile overrides `serve`'s `compression` dependency to patched version 1.8.2 ([GHSA-vc2v-76pw-4v95](https://github.com/advisories/GHSA-vc2v-76pw-4v95)).
+
+The NDK's bundled Python replaces its vulnerable setuptools 65.5.0 with [setuptools 78.1.1](https://pypi.org/project/setuptools/78.1.1/) from a checksum-pinned wheel. Keep its version, URL, and SHA-256 together in the Dockerfile and catalog when updating.
 
 Android/iOS emulators, simulator images, and iOS device builds are excluded. Apple SDK-dependent native tests require a separate macOS environment. Android builds can produce APK/AAB files without a device; `npx expo run:android` also tries to install/run the app and therefore needs an external device. Release signing and store upload credentials must be supplied separately.
 

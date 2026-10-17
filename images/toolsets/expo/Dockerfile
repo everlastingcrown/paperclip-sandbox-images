@@ -14,6 +14,9 @@ ARG ANDROID_PLATFORM=36
 ARG ANDROID_BUILD_TOOLS=36.0.0
 ARG ANDROID_NDK=27.1.12297006
 ARG ANDROID_CMAKE=3.22.1
+ARG NDK_SETUPTOOLS_VERSION=78.1.1
+ARG NDK_SETUPTOOLS_SHA256=c3a9c4211ff4c309edb8b8c4f1cbfa7ae324c4ba9f91ff254e3d305b9fd54561
+ARG NDK_SETUPTOOLS_URL=https://files.pythonhosted.org/packages/90/99/158ad0609729111163fc1f674a5a42f2605371a4cf036d0441070e2f7455/setuptools-78.1.1-py3-none-any.whl
 
 ENV JAVA_HOME=/opt/java17 \
     ANDROID_HOME=/opt/android-sdk \
@@ -21,7 +24,7 @@ ENV JAVA_HOME=/opt/java17 \
     PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
     PLAYWRIGHT_SKIP_BROWSER_GC=1 \
     NO_UPDATE_CHECK=1
-ENV PATH="/opt/java17/bin:/opt/android-sdk/cmdline-tools/19.0/bin:/opt/android-sdk/cmake/3.22.1/bin:${PATH}"
+ENV PATH="/opt/java17/bin:/opt/android-sdk/cmake/3.22.1/bin:${PATH}"
 
 # Track Debian security updates for distribution packages, as the base does.
 # hadolint ignore=DL3008
