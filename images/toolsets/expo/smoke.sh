@@ -28,7 +28,7 @@ case "$(uname -m)" in
     test -r "$ANDROID_HOME/licenses/android-sdk-license"
     test ! -e "$ANDROID_HOME/cmdline-tools"
     "$ANDROID_HOME/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/python3/bin/python3" \
-      -c 'import setuptools; assert setuptools.__version__ == "78.1.1"'
+      -c 'import setuptools; assert setuptools.__version__ == "80.10.2"'
     rg '^Pkg.Revision\s*=\s*27\.1\.12297006\s*$' "$ANDROID_HOME/ndk/27.1.12297006/source.properties"
     "$ANDROID_HOME/build-tools/36.0.0/aapt2" version
     "$ANDROID_HOME/cmake/3.22.1/bin/cmake" --version

@@ -15,7 +15,7 @@ Google's Linux NDK host toolchain uses `linux-x86_64` binaries. Use an AMD64 wor
 
 Debian packages track distribution security updates, as in the base image. The tools lockfile overrides `serve`'s `compression` dependency to patched version 1.8.2 ([GHSA-vc2v-76pw-4v95](https://github.com/advisories/GHSA-vc2v-76pw-4v95)).
 
-The NDK's bundled Python replaces its vulnerable setuptools 65.5.0 with [setuptools 78.1.1](https://pypi.org/project/setuptools/78.1.1/) from a checksum-pinned wheel. Keep its version, URL, and SHA-256 together in the Dockerfile and catalog when updating.
+The NDK's bundled Python replaces its vulnerable setuptools 65.5.0 with [setuptools 80.10.2](https://pypi.org/project/setuptools/80.10.2/) from a checksum-pinned wheel. Keep its version, URL, and SHA-256 together in the Dockerfile and catalog when updating.
 
 Android/iOS emulators, simulator images, and iOS device builds are excluded. Apple SDK-dependent native tests require a separate macOS environment. Android builds can produce APK/AAB files without a device; `npx expo run:android` also tries to install/run the app and therefore needs an external device. Release signing and store upload credentials must be supplied separately.
 
