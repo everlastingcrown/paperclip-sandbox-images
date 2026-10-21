@@ -1,6 +1,13 @@
 # Expo toolset 1.0.0
 
-`expo-1-codex` extends `codex-0-162-1` (and `base-1`) for Expo web development and Android builds. Its version tag is `sandbox-expo-codex:1.0.0-codex-0.162.1` under the configured registry namespace. The image supplies shared development tools; project source, dependencies, caches, and credentials are provided at runtime.
+The Expo toolset supplies the same tools for Expo web development and Android builds over either harness, using the shared `Dockerfile` and `base-1` runtime. The catalog registers these variants under the configured registry namespace:
+
+| Catalog ID        | Parent            | Version tag                                   |
+| ----------------- | ----------------- | --------------------------------------------- |
+| `expo-1-codex`    | `codex-0-162-1`   | `sandbox-expo-codex:1.0.0-codex-0.162.1`      |
+| `expo-1-opencode` | `opencode-1-19-0` | `sandbox-expo-opencode:1.0.0-opencode-1.19.0` |
+
+The images supply shared development tools; project source, dependencies, caches, and credentials are provided at runtime.
 
 | Included tools                                                      | AMD64 | ARM64 |
 | ------------------------------------------------------------------- | ----- | ----- |
@@ -50,7 +57,7 @@ Prebuild modifies the project's native Android directory; review generated chang
 
 ## Validation
 
-`paperclip-expo --version` reports the bundle release. `paperclip-expo check` compiles a host C object, compiles/runs a Java 17 class, exercises Python SQLite, serves a local page, launches Chromium, clicks its UI, and captures a screenshot. Generated native binaries are not executed because runtime tmpfs mounts are `noexec`. On AMD64 it also checks the SDK platform/license, runs AAPT2/CMake/Ninja, and compiles an Android ARM64 object with the NDK. The catalog repeats these checks offline under the restricted runtime contract and inherits Codex's smoke check. Full project tests require a checkout and its dependencies.
+`paperclip-expo --version` reports the bundle release. `paperclip-expo check` compiles a host C object, compiles/runs a Java 17 class, exercises Python SQLite, serves a local page, launches Chromium, clicks its UI, and captures a screenshot. Generated native binaries are not executed because runtime tmpfs mounts are `noexec`. On AMD64 it also checks the SDK platform/license, runs AAPT2/CMake/Ninja, and compiles an Android ARM64 object with the NDK. The catalog repeats these checks offline under the restricted runtime contract and inherits the selected harness's smoke check. Full project tests require a checkout and its dependencies.
 
 To build the entire chain without relying on previously published parents:
 
@@ -60,6 +67,6 @@ pnpm images build --platform linux/amd64
 pnpm images test --platform linux/amd64
 ```
 
-Repeat the build/test commands on a native ARM64 worker. Selecting `base-1` also includes the other active harness descendants. To build just this toolset against an already published parent, use `pnpm images plan --select expo-1-codex --resolve` instead. Both architecture tests and scans must pass before publication.
+Repeat the build/test commands on a native ARM64 worker. Selecting `base-1` also includes the other active harness descendants. To build just this toolset against an already published parent, use `pnpm images plan --select expo-1-codex --resolve` or `pnpm images plan --select expo-1-opencode --resolve` instead. Both architecture tests and scans must pass before publication.
 
 Sources: [Android SDK Manager](https://developer.android.com/tools/sdkmanager), [Google SDK package metadata](https://dl.google.com/android/repository/repository2-1.xml), [NDK downloads](https://developer.android.com/ndk/downloads), and [Playwright shared browser installation](https://playwright.dev/docs/browsers#managing-browser-binaries).
