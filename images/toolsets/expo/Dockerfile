@@ -48,6 +48,7 @@ COPY install-android.sh smoke.sh smoke-browser.mjs ./
 RUN sh ./install-android.sh \
     && printf '%s\n' "${TOOLSET_VERSION}" > VERSION
 COPY --chmod=0755 paperclip-expo /usr/local/bin/paperclip-expo
+COPY --chmod=0644 java-openshell-ca.sh /etc/profile.d/java-openshell-ca.sh
 
 USER 1000:1000
 WORKDIR /workspace

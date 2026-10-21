@@ -53,6 +53,22 @@ pnpm images test --platform linux/amd64
 
 The JSON plan is written to `out/plan.json`; OCI layouts and evidence live beneath `out/<architecture>/`. Publishing is restricted to trusted main-branch Actions runs.
 
+## Expo Java trust in OpenShell
+
+The Expo image installs `/etc/profile.d/java-openshell-ca.sh`. When a login shell
+(such as `bash -lc`) finds `/etc/openshell-tls/openshell-ca.pem`, it copies the JDK's
+default truststore into a private directory under `/tmp`, imports the mounted CA,
+and appends the truststore settings to `JAVA_TOOL_OPTIONS`. This reaches both the
+Gradle wrapper and its daemon while preserving options such as
+`-Djava.net.preferIPv4Stack=true`. An explicit truststore in `JAVA_TOOL_OPTIONS`
+takes precedence. Without the mounted CA, the script leaves Java options alone.
+
+Launch Java through a login shell or source the profile script before starting it.
+The generated stores remain available to child processes until sandbox temporary
+storage is cleared. Rebuild the image and recreate the sandbox to install this
+hook; stop existing Gradle daemons before retrying with the new trust settings.
+The policy must still allow Java to access distribution and dependency hosts.
+
 ## Retirement and dependency maintenance
 
 Remove retired entries and remove/reparent descendants together. Registry artifacts are retained. Removing the selected `latest` schedules the next highest stable entry for validation. With no stable entries, no new `latest` is created; historical alias removal remains a deliberate registry administration action.
