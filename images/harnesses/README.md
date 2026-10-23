@@ -18,6 +18,37 @@ Claude's `claude-code` symlink preserves the upstream Paperclip command name whi
 
 Use `codex` or `opencode` as the command for the other harnesses. Mount a writable home, workspace, and temporary directory as described in the [base runtime documentation](../base/runtime/README.md). Supply credentials at run time.
 
+## OpenCode snapshots
+
+The OpenCode image installs root-owned, world-readable
+`/etc/opencode/opencode.json` with `{"snapshot":false}`. Paperclip places OpenCode's
+HOME under `/sandbox/paperclip-workspace/.paperclip-runtime/opencode/`; snapshots
+can otherwise capture runtime data, including previous snapshots, recursively.
+This managed setting also applies to the Expo OpenCode descendant.
+
+For OpenCode 1.19.0, Linux [managed configuration](https://github.com/anomalyco/opencode/blob/v1.19.0/packages/opencode/src/config/managed.ts)
+lives in `/etc/opencode`. The [configuration loader](https://github.com/anomalyco/opencode/blob/v1.19.0/packages/opencode/src/config/config.ts)
+loads it after global, project, inline, and active-account configuration, so an
+earlier `snapshot: true` cannot override it. It survives relocated `HOME` and
+`XDG_CONFIG_HOME` without an entrypoint hook. `OPENCODE_TEST_MANAGED_CONFIG_DIR`
+can explicitly override the managed directory; leave it unset in production.
+Recheck these contracts when upgrading OpenCode.
+
+Disabling snapshots removes automatic filesystem checkpoints and file restoration
+through OpenCode undo/revert for subsequent steps. Snapshot-derived change
+summaries may also be reduced. Conversation history, model context, normal editing,
+and Git operations remain available. Existing snapshots are not deleted.
+
+For release review, select `opencode-1-19-0` with `--resolve` using the workflow
+below; this also selects `expo-1-opencode`. Build and test both architectures, then
+use the trusted current-main publication workflow to promote the tested OCI bytes
+without rebuilding. Publication and deployment require separate authorization.
+After rollout, create a fresh sandbox using the new image digest: existing
+containers and already-running OpenCode processes will not pick up this change.
+Measure command timing and snapshot growth after rollout before claiming a
+performance improvement. The separately observed OpenShell callback/relay timeout
+has no proven relationship to snapshot pressure or demonstrated fix here.
+
 ## Upstream reference
 
 Reviewed Paperclip revision: [`38d8f371722b315d2fb3bbaa512518742e33ce2f`](https://github.com/paperclipai/paperclip/tree/38d8f371722b315d2fb3bbaa512518742e33ce2f/docker/agent-runtime).
