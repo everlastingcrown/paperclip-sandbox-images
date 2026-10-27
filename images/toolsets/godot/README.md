@@ -71,8 +71,10 @@ uses a synthetic project to import an SVG, run GDScript, write user data, exchan
 WebSocket packets on loopback, query SQLite, and export Web/Linux/Windows builds.
 It loads the Web export in Chromium, clicks the rendered Godot button, verifies
 the game callback, and captures a screenshot inside its temporary work directory.
-Temporary files are removed on exit. No network, project checkout, or credentials
-are required. Generated native binaries are not executed on `noexec` mounts.
+The browser and WebSocket checks bind OS-assigned loopback ports so parallel
+builds cannot connect to another check's server. Each invocation also isolates
+Godot's temporary export files and removes them on exit. No external network,
+project checkout, or credentials are required. Generated native binaries are not executed on `noexec` mounts.
 
 The catalog repeats these checks with a read-only root filesystem, fresh writable
 home, no external network, and inherited harness checks. Both native architectures

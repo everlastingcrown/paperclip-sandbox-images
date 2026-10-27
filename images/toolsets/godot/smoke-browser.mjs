@@ -1,30 +1,22 @@
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { setTimeout } from 'node:timers/promises';
+import { log } from 'node:console';
+import { once } from 'node:events';
+import { createServer } from 'node:http';
+import { resolve } from 'node:path';
+import serveHandler from './node_modules/serve-handler/src/index.js';
 import { chromium } from './node_modules/playwright/index.mjs';
 
-const server = spawn(
-  'serve',
-  ['--listen', 'tcp://127.0.0.1:18474', '--no-clipboard', 'exports'],
-  { stdio: 'inherit' },
+// BuildKit can run harness variants in the same network namespace. Let the OS
+// allocate a port and use this server's address rather than probing a shared one.
+const server = createServer((request, response) =>
+  serveHandler(request, response, { public: resolve('exports') }),
 );
-const stopped = new Promise((resolve, reject) => {
-  server.once('exit', resolve);
-  server.once('error', reject);
-});
 let browser;
 try {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const response = await globalThis.fetch('http://127.0.0.1:18474');
-      assert.equal(response.status, 200);
-      await response.text();
-      break;
-    } catch (error) {
-      if (attempt === 49) throw error;
-      await setTimeout(100);
-    }
-  }
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const url = `http://127.0.0.1:${server.address().port}`;
+  log(`Godot browser smoke listening on ${url}`);
   browser = await chromium.launch({
     headless: true,
     args: [
@@ -36,7 +28,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 640, height: 480 } });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('http://127.0.0.1:18474');
+  await page.goto(url);
   await page.waitForFunction(() => globalThis.godotSmokeReady === true);
   const canvas = page.locator('canvas');
   await canvas.click({ position: { x: 120, y: 60 } });
@@ -46,6 +38,8 @@ try {
   assert.deepEqual(errors, []);
 } finally {
   await browser?.close();
-  server.kill('SIGTERM');
-  await stopped;
+  await new Promise((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+    server.closeAllConnections();
+  });
 }

@@ -1,8 +1,10 @@
 #!/bin/sh
 set -eu
-work=$(mktemp -d /tmp/godot-smoke.XXXXXX)
+work=$(mktemp -d "${TMPDIR:-/tmp}/godot-smoke.XXXXXX")
 trap 'rm -rf "$work"' EXIT HUP INT TERM
-mkdir "$work/project" "$work/exports"
+# Godot exports use fixed temporary filenames; isolate concurrent checks.
+export TMPDIR="$work/tmp"
+mkdir "$work/project" "$work/exports" "$TMPDIR"
 cp -R /opt/godot-tools/fixture/. "$work/project/"
 cd "$work/project"
 version=$(cat /opt/godot/TEMPLATE_VERSION)
