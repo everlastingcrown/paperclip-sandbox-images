@@ -51,6 +51,9 @@ jobs:
     needs: checks
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
     outputs:
       has-images: ${{ steps.plan.outputs.has-images }}
     steps:
@@ -64,12 +67,18 @@ jobs:
           node-version: 24.15.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Find last successful automatic release
+        if: github.event_name == 'push'
+        id: baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node --import tsx scripts/release-baseline.ts
       - name: Determine affected entries
         id: plan
         env:
           EVENT: ${{ github.event_name }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PUSH_BASE: ${{ github.event.before }}
+          RELEASE_BASE: ${{ steps.baseline.outputs.base }}
           SELECTION: ${{ inputs.images }}
         shell: bash
         run: |
@@ -80,10 +89,15 @@ jobs:
             pnpm images plan --select "$SELECTION"
           elif [[ "$EVENT" == pull_request ]]; then
             pnpm images plan --base "$PR_BASE"
-          elif [[ "$PUSH_BASE" =~ ^0+$ ]]; then
-            pnpm images plan --select all
+          elif [[ "$EVENT" == push ]]; then
+            if [[ -n "$RELEASE_BASE" ]]; then
+              pnpm images plan --base "$RELEASE_BASE"
+            else
+              pnpm images plan --select all
+            fi
           else
-            pnpm images plan --base "$PUSH_BASE"
+            echo "Unsupported planning event: $EVENT" >&2
+            exit 1
           fi
       - name: Resolve unchanged parents
         if: steps.plan.outputs.has-images == 'true'
