@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+case "${1:-}" in
+  --version) cat /opt/godot-tools/VERSION ;;
+  check) exec sh /opt/godot-tools/smoke.sh ;;
+  *) echo 'Usage: paperclip-godot <--version|check>' >&2; exit 2 ;;
+esac

@@ -150,6 +150,10 @@ try {
         'images/toolsets/expo/install-android.sh',
         'images/toolsets/expo/smoke.sh',
         'images/toolsets/expo/paperclip-expo',
+        'images/toolsets/godot/install-godot.sh',
+        'images/toolsets/godot/smoke.sh',
+        'images/toolsets/godot/godot',
+        'images/toolsets/godot/paperclip-godot',
       ])
         if (existsSync(file)) run('shellcheck', [file]);
       break;

@@ -12,6 +12,8 @@ The active catalog includes [base runtime 1.0.0](images/base/runtime/README.md):
 
 The [Expo toolset](images/toolsets/expo/README.md) adds Expo web development, Playwright Chromium, and AMD64 Android builds to the Codex harness.
 
+The [Godot toolset](images/toolsets/godot/README.md) adds headless Godot development, Web/Linux/Windows exports, SQLite, and Playwright Chromium to Codex and OpenCode on AMD64 and ARM64.
+
 ## Layout
 
 | Location                       | Purpose                                                                      |

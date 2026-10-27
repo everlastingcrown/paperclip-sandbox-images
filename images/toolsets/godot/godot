@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+# A mounted fresh HOME must not hide the baked export templates. Respect XDG.
+version=$(cat /opt/godot/TEMPLATE_VERSION)
+parent="${XDG_DATA_HOME:-$HOME/.local/share}/godot/export_templates"
+mkdir -p "$parent"
+if [ ! -e "$parent/$version" ] && [ ! -L "$parent/$version" ]; then
+  # Concurrent first launches may race; never follow a destination directory.
+  ln -sT "/opt/godot/templates/$version" "$parent/$version" 2>/dev/null \
+    || test -e "$parent/$version"
+fi
+exec /opt/godot/godot "$@"

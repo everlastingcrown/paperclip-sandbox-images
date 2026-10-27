@@ -168,6 +168,68 @@
           "smoke": "set -eu; serve --help | rg -- '--listen'"
         }
       ]
+    },
+    {
+      "id": "godot-1-codex",
+      "layer": "toolset",
+      "repository": "sandbox-godot-codex",
+      "capability": "godot",
+      "version": "1.0.0",
+      "parent": "codex-0-162-1",
+      "dockerfile": "images/toolsets/godot/Dockerfile",
+      "context": "images/toolsets/godot",
+      "args": {
+        "TOOLSET_VERSION": "1.0.0",
+        "GODOT_VERSION": "4.6.3",
+        "GODOT_AMD64_SHA256": "d0bc2113065e481c9c2c2b2c37daa4e8be3fe9e27f0ab9ab0b6096e9a37907f3",
+        "GODOT_ARM64_SHA256": "90c70382eee1542904bf507b9bdc6e62a230ac73fd214bf3887a9e0a4d85aeed",
+        "GODOT_TEMPLATES_SHA256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8"
+      },
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "paperclip-godot",
+          "expected": "1.0.0",
+          "smoke": "paperclip-godot check"
+        },
+        {
+          "command": "playwright",
+          "expected": "1.61.0",
+          "smoke": "test -r /opt/godot-tools/node_modules/playwright-core/browsers.json"
+        }
+      ]
+    },
+    {
+      "id": "godot-1-opencode",
+      "layer": "toolset",
+      "repository": "sandbox-godot-opencode",
+      "capability": "godot",
+      "version": "1.0.0",
+      "parent": "opencode-1-19-0",
+      "dockerfile": "images/toolsets/godot/Dockerfile",
+      "context": "images/toolsets/godot",
+      "args": {
+        "TOOLSET_VERSION": "1.0.0",
+        "GODOT_VERSION": "4.6.3",
+        "GODOT_AMD64_SHA256": "d0bc2113065e481c9c2c2b2c37daa4e8be3fe9e27f0ab9ab0b6096e9a37907f3",
+        "GODOT_ARM64_SHA256": "90c70382eee1542904bf507b9bdc6e62a230ac73fd214bf3887a9e0a4d85aeed",
+        "GODOT_TEMPLATES_SHA256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8"
+      },
+      "watch": [],
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "checks": [
+        {
+          "command": "paperclip-godot",
+          "expected": "1.0.0",
+          "smoke": "paperclip-godot check"
+        },
+        {
+          "command": "playwright",
+          "expected": "1.61.0",
+          "smoke": "test -r /opt/godot-tools/node_modules/playwright-core/browsers.json"
+        }
+      ]
     }
   ]
 }
