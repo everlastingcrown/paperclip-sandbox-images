@@ -41,6 +41,10 @@ COPY smoke.sh smoke-browser.mjs ./
 COPY fixture ./fixture
 COPY --chmod=0755 godot paperclip-godot /usr/local/bin/
 
+# Root installers inherit the runtime HOME and may create root-owned XDG paths.
+# Restore the entire user home before the non-root smoke check and runtime use.
+RUN chown -R 1000:1000 /home/paperclip
+
 USER 1000:1000
 WORKDIR /workspace
 RUN paperclip-godot check
