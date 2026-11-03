@@ -10,14 +10,15 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOPROXY=off GOTOOLCHAIN=
 FROM node:24.22.0-bookworm-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS runtime
 
 LABEL org.opencontainers.image.title="Paperclip sandbox base runtime" \
-    org.opencontainers.image.description="Shared Node.js runtime and Paperclip agent shim for sandbox harnesses"
+    org.opencontainers.image.description="Shared Node.js and Python runtime and Paperclip agent shim for sandbox harnesses"
 
 # Refresh distribution security fixes on rebuilds; intentionally track APT packages.
 # hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
-        bash ca-certificates coreutils curl gh git ripgrep tar tini \
+        bash ca-certificates coreutils curl gh git \
+        python3 python-is-python3 python3-venv ripgrep tar tini \
     # Reject stale package mirrors/caches missing the Bookworm security fixes
     # for CVE-2026-111497 (Brotli) and CVE-2026-84782 (OpenSSL).
     && dpkg-query -W libbrotli1 libssl3 openssl \

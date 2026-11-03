@@ -8,7 +8,7 @@ flowchart LR
   Harness --> Toolset[Toolset: exact capability version]
 ```
 
-The active catalog includes [base runtime 1.0.0](images/base/runtime/README.md): Node.js 24, shared runtime tools, the Paperclip agent shim, and non-root defaults for AMD64 and ARM64. CI builds and tests registered recipes before publication.
+The active catalog includes [base runtime 1.0.0](images/base/runtime/README.md): Node.js 24, Python 3.11 with virtual environments, shared runtime tools, the Paperclip agent shim, and non-root defaults for AMD64 and ARM64. CI builds and tests registered recipes before publication.
 
 The [Expo toolset](images/toolsets/expo/README.md) adds Expo web development, Playwright Chromium, and AMD64 Android builds to the Codex harness.
 
