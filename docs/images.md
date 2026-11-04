@@ -69,6 +69,28 @@ storage is cleared. Rebuild the image and recreate the sandbox to install this
 hook; stop existing Gradle daemons before retrying with the new trust settings.
 The policy must still allow Java to access distribution and dependency hosts.
 
+## Native Godot windows with Xvfb
+
+The Godot toolsets include Xvfb, Xauthority, XKB data/utilities, X11 diagnostics,
+and Mesa software rendering. Run a native editor or project as the sandbox user:
+
+```sh
+xvfb-run -a -s '-screen 0 1152x648x24 -nolisten tcp' xdpyinfo >/dev/null
+LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s '-screen 0 1152x648x24 -nolisten tcp' \
+  godot --display-driver x11 --rendering-method gl_compatibility --editor --path /workspace/project
+```
+
+Xvfb provides an offscreen display. Capture the Godot viewport or use an X11
+screenshot client on the same `DISPLAY`/`XAUTHORITY` to inspect the result.
+`paperclip-godot check` verifies X11/XKB startup and captures a native fixture
+viewport before continuing with export and browser checks. It prints the Xvfb
+and client logs if native startup fails.
+
+The image creates root-owned `/tmp/.X11-unix` with mode `1777`. If a provider
+mounts a fresh `/tmp` over the image directory, it should recreate this directory
+with the same ownership and permissions before switching to the runtime user.
+Rebuild the image and recreate existing sandboxes to install these dependencies.
+
 ## Retirement and dependency maintenance
 
 Remove retired entries and remove/reparent descendants together. Registry artifacts are retained. Removing the selected `latest` schedules the next highest stable entry for validation. With no stable entries, no new `latest` is created; historical alias removal remains a deliberate registry administration action.

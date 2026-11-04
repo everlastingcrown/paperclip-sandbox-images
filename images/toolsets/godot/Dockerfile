@@ -2,7 +2,7 @@
 FROM paperclip-parent
 
 LABEL org.opencontainers.image.title="Paperclip Godot toolset" \
-    org.opencontainers.image.description="Godot headless development, web and desktop exports, and Chromium automation"
+    org.opencontainers.image.description="Godot development with Xvfb, web and desktop exports, and Chromium automation"
 
 USER 0:0
 ARG TARGETARCH
@@ -22,6 +22,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         unzip sqlite3 libfontconfig1 libx11-6 libxcursor1 libxinerama1 \
         libgl1 libegl1 libasound2 libxrandr2 libxi6 libgl1-mesa-dri \
+        xvfb xauth xkb-data x11-xkb-utils x11-utils \
+    && install -d -m 1777 /tmp/.X11-unix \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/godot-tools
