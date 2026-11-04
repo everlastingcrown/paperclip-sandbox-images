@@ -1,4 +1,17 @@
 # hadolint ignore=DL3006
+FROM paperclip-parent AS xvfb-compat-build
+
+USER 0:0
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+COPY xvfb-compat.c /tmp/xvfb-compat.c
+USER 1000:1000
+RUN cc -std=c11 -O2 -Wall -Wextra -Werror -fPIC -shared \
+    -o /tmp/libpaperclip-xvfb.so /tmp/xvfb-compat.c -ldl
+
+# hadolint ignore=DL3006
 FROM paperclip-parent
 
 LABEL org.opencontainers.image.title="Paperclip Godot toolset" \
@@ -42,6 +55,8 @@ RUN sh ./install-godot.sh \
 COPY smoke.sh smoke-browser.mjs ./
 COPY fixture ./fixture
 COPY --chmod=0755 godot paperclip-godot /usr/local/bin/
+COPY --from=xvfb-compat-build /tmp/libpaperclip-xvfb.so /usr/local/lib/
+COPY --chmod=0755 Xvfb /usr/local/bin/Xvfb
 
 # Root installers inherit the runtime HOME and may create root-owned XDG paths.
 # Restore the entire user home before the non-root smoke check and runtime use.

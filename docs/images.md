@@ -89,6 +89,18 @@ and client logs if native startup fails.
 The image creates root-owned `/tmp/.X11-unix` with mode `1777`. If a provider
 mounts a fresh `/tmp` over the image directory, it should recreate this directory
 with the same ownership and permissions before switching to the runtime user.
+
+The `Xvfb` launcher preloads a compatibility library for OpenShell, which blocks
+the `setuid`/`setgid` calls Xserver makes before launching `xkbcomp`, even when
+the requested IDs are unchanged. The library skips a reset only when the real,
+effective, and saved IDs already match the requested ID. Actual identity changes
+still go through libc and remain subject to sandbox restrictions. The preload is
+scoped to Xvfb and its child processes.
+
+Xvfb compiles keymaps at startup and falls back to writable `/tmp` when Debian's
+`/var/lib/xkb` is not writable. No additional filesystem policy grants or
+precompiled keymaps are required.
+
 Rebuild the image and recreate existing sandboxes to install these dependencies.
 
 ## Retirement and dependency maintenance
