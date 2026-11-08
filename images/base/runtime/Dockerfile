@@ -17,7 +17,7 @@ LABEL org.opencontainers.image.title="Paperclip sandbox base runtime" \
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
-        bash ca-certificates coreutils curl gh git \
+        bash ca-certificates coreutils curl gh git jq \
         python3 python-is-python3 python3-venv ripgrep tar tini \
     # Reject stale package mirrors/caches missing the Bookworm security fixes
     # for CVE-2026-111497 (Brotli) and CVE-2026-84782 (OpenSSL).

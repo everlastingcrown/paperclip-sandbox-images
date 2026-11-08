@@ -4,10 +4,11 @@ set -eu
 test "$(id -u)" = 1000
 test "$(id -g)" = 1000
 test "$PWD" = /workspace
-for command in sh node python python3 tar gh git rg tini paperclip-agent-shim; do
+for command in sh node python python3 tar gh git jq rg tini paperclip-agent-shim; do
   command -v "$command" >/dev/null
 done
 gh --version
+printf '{"tool":"jq"}\n' | jq -e '.tool == "jq"' >/dev/null
 node -e 'if (Number(process.versions.node.split(".")[0]) < 24) process.exit(1)'
 
 python -c 'import sys; assert sys.version_info >= (3, 11)'
