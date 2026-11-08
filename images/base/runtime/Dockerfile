@@ -1,4 +1,4 @@
-FROM ghcr.io/paperclipai/paperclip:2026.1106.0@sha256:d6584f05cf57a4b26c117eb083725f18c1fe69ddafa7d16c9f8cce83f6fa17da AS runner-source
+FROM ghcr.io/everlastingcrown/paperclip-backport:sha-6b7a08a6889073135e2651de2295402e09f4d70f@sha256:02631216fd0bde3c5da71621f65b644c81374820fcdcf77f7f2c7188ab2ca284 AS runner-source
 
 FROM node:24.22.0-trixie-slim@sha256:a6155384446670e9719bdc4fd0ebe4d4b29fb32a8d6aa523da3547a6cfbcf22c AS runner-assets
 ARG TARGETARCH

@@ -22,10 +22,12 @@ They do not need a profile or runtime installation. System Node 24.22.0 remains
 first on PATH, while pack launchers retain their verified bundled interpreter.
 OpenCode's managed configuration sets `snapshot: false`.
 
-The assets come from Paperclip **v2026.1106.0**, source
+The asset checks remain pinned to Paperclip **v2026.1106.0**, source
 `d69631b01b9c658f80bf8bed389863dce82643e1`, using the source image
-`ghcr.io/paperclipai/paperclip:2026.1106.0@sha256:d6584f05cf57a4b26c117eb083725f18c1fe69ddafa7d16c9f8cce83f6fa17da`.
-The image's OCI labels were checked against the release revision on both architectures.
+`ghcr.io/everlastingcrown/paperclip-backport:sha-6b7a08a6889073135e2651de2295402e09f4d70f@sha256:02631216fd0bde3c5da71621f65b644c81374820fcdcf77f7f2c7188ab2ca284`.
+The pinned backport image index includes Linux amd64 and ARM64 manifests.
+The importer verifies the vendored runner against the release revision and
+checksums below.
 The pinned Node runtime is Debian Trixie; the released daemon requires GNU libc
 2.39 or newer. Python is 3.13, and Expo uses OpenJDK 21.
 
