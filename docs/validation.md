@@ -12,7 +12,7 @@ Authenticated API calls are excluded from required smoke tests. Add separately c
 
 ## Security and supply chain
 
-Trivy reports vulnerabilities on each architecture. Fixable high/critical findings block publication; unfixed findings remain visible. Secret scanning runs separately without vulnerability severity/status filtering, and any detected secret blocks publication. Scanner/download/database failures are fatal. There is no automatic bypass or blanket ignore list.
+Trivy reports vulnerabilities on each architecture. Fixable high/critical findings block publication except for the explicitly accepted upstream provider-pack findings in `scripts/trivyignore.yaml`. Each exception identifies a finding ID, package version (PURL), exact vendored path, and reason; review and remove these exceptions when updating the Paperclip release. The exceptions apply only to the publication vulnerability gate; the full JSON vulnerability report retains all findings. Unfixed findings remain visible. Secret scanning runs separately without vulnerability severity/status filtering or these exceptions, and any detected secret blocks publication. Scanner/download/database failures are fatal. There is no automatic bypass or blanket ignore list.
 
 SBOMs use CycloneDX. BuildKit emits provenance. Cosign signs and attests via GitHub OIDC; verification requires the exact main-branch workflow identity and GitHub issuer. CI binaries have fixed checksums, Actions have fixed commits, and image build/test jobs have no publishing credentials.
 

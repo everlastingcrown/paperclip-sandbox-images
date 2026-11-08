@@ -252,6 +252,12 @@ describe('runtime and scanner gates', () => {
           args.includes('HIGH,CRITICAL') && args.includes('--ignore-unfixed'),
       ),
     ).toBe(true);
+    const gatedScan = scans.find((args) => args.includes('HIGH,CRITICAL'))!;
+    expect(gatedScan[gatedScan.indexOf('--ignorefile') + 1]).toBe(
+      'scripts/trivyignore.yaml',
+    );
+    for (const scan of scans.filter((args) => args !== gatedScan))
+      expect(scan).not.toContain('--ignorefile');
     expect(assertTested(plan, 'linux/amd64', plan.images[0]!, out).passed).toBe(
       true,
     );

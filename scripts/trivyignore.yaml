@@ -1,0 +1,100 @@
+# Accepted upstream provider-pack findings from Paperclip v2026.1106.0.
+# Preserve the release-verified pack; remove these exceptions when upgrading it.
+# Only the publication vulnerability gate uses this file; raw reports remain complete.
+vulnerabilities:
+  - id: CVE-2026-102282
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/copilot/linux-x64/distribution/foundry-local-sdk/node_modules/foundry-local-sdk/node_modules/adm-zip/package.json
+    purls:
+      - pkg:npm/adm-zip@0.6.0
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-102992
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/cursor/linux-x64/node_modules/piscina/package.json
+    purls:
+      - pkg:npm/piscina@4.9.3
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-109383
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/pi/linux-x64/runtime/node_modules/@earendil-works/pi-coding-agent/node_modules/undici/package.json
+    purls:
+      - pkg:npm/undici@8.10.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-109829
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/pi/linux-x64/runtime/node_modules/@earendil-works/pi-coding-agent/node_modules/undici/package.json
+    purls:
+      - pkg:npm/undici@8.10.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-109869
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/pi/linux-x64/runtime/node_modules/@earendil-works/pi-coding-agent/node_modules/undici/package.json
+    purls:
+      - pkg:npm/undici@8.10.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-13676
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-16221
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-18446
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-75899
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-75975
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-76172
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-77301
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/copilot/linux-x64/distribution/foundry-local-sdk/node_modules/foundry-local-sdk/node_modules/adm-zip/package.json
+    purls:
+      - pkg:npm/adm-zip@0.6.0
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-84292
+    paths:
+      - opt/paperclip-runner/provider-pack/node_modules/.pnpm/fast-uri@3.1.2/node_modules/fast-uri/package.json
+    purls:
+      - pkg:npm/fast-uri@3.1.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: CVE-2026-87018
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/pi/linux-x64/runtime/node_modules/@earendil-works/pi-coding-agent/node_modules/undici/package.json
+    purls:
+      - pkg:npm/undici@8.10.2
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: GHSA-8238-w5pm-2374
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/copilot/linux-x64/distribution/foundry-local-sdk/node_modules/foundry-local-sdk/node_modules/adm-zip/package.json
+    purls:
+      - pkg:npm/adm-zip@0.6.0
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.
+  - id: GHSA-rcw4-f5rp-g42v
+    paths:
+      - opt/paperclip-runner/provider-pack/provider-assets/copilot/linux-x64/distribution/foundry-local-sdk/node_modules/foundry-local-sdk/node_modules/adm-zip/package.json
+    purls:
+      - pkg:npm/adm-zip@0.6.0
+    statement: Accepted upstream dependency in the checksum-verified Paperclip v2026.1106.0 provider pack; cannot upgrade independently of the Runner release.

@@ -208,6 +208,8 @@ export function testImages(
         'vuln',
         '--severity',
         'HIGH,CRITICAL',
+        '--ignorefile',
+        'scripts/trivyignore.yaml',
         '--ignore-unfixed',
         '--exit-code',
         '1',
