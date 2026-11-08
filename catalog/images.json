@@ -32,7 +32,7 @@
         {
           "command": "opencode",
           "expected": "1.18.34",
-          "smoke": "set -eu; OPENCODE_DISABLE_MODELS_FETCH=true opencode debug paths > /workspace/opencode-paths.txt; rg '^home +/home/paperclip$' /workspace/opencode-paths.txt; rg '^config +/home/paperclip/.config/opencode$' /workspace/opencode-paths.txt; test -d /home/paperclip/.local/share/opencode"
+          "smoke": "set -eu; OPENCODE_DISABLE_MODELS_FETCH=true opencode debug paths > /workspace/opencode-paths.txt; rg \"^home +$HOME$\" /workspace/opencode-paths.txt; rg \"^config +$HOME/.config/opencode$\" /workspace/opencode-paths.txt; test -d \"$HOME/.local/share/opencode\"; test -d \"${XDG_CACHE_HOME:-$HOME/.cache}\""
         }
       ]
     },

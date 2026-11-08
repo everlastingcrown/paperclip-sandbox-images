@@ -82,7 +82,6 @@ RUN cp /usr/local/bin/codex /usr/local/bin/claude \
 
 ENV PAPERCLIP_RUNNER_REMOTE_PROVIDER_PACK_PATH=/opt/paperclip-runner/provider-pack \
     HOME=/home/paperclip \
-    XDG_CACHE_HOME=/home/paperclip/.cache \
     TMPDIR=/tmp
 
 USER 1000:1000

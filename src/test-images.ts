@@ -32,7 +32,10 @@ export function evidenceDigests(directory: string): Record<string, string> {
   );
 }
 
-export function runtimeArgs(name: string): string[] {
+export function runtimeArgs(
+  name: string,
+  { home = '/home/paperclip', uid = 1000, gid = 1000 } = {},
+): string[] {
   return [
     '--read-only',
     '--cap-drop=ALL',
@@ -41,14 +44,12 @@ export function runtimeArgs(name: string): string[] {
     '--pids-limit=128',
     '--memory=1g',
     '--cpus=2',
-    ...['/workspace', '/home/paperclip', '/tmp'].flatMap((path) => [
+    ...['/workspace', home, '/tmp'].flatMap((path) => [
       '--tmpfs',
-      `${path}:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700`,
+      `${path}:rw,nosuid,nodev,uid=${uid},gid=${gid},mode=0700`,
     ]),
     '-e',
-    'HOME=/home/paperclip',
-    '-e',
-    'XDG_CACHE_HOME=/home/paperclip',
+    `HOME=${home}`,
     '-e',
     'TMPDIR=/tmp',
     '--name',
@@ -67,12 +68,13 @@ export function testRuntime(
     suffix: string,
     args: string[],
     command: string[],
+    profile?: Parameters<typeof runtimeArgs>[1],
   ): string => {
     const name = `${prefix}-${suffix}`;
     try {
       return run('docker', [
         'run',
-        ...runtimeArgs(name),
+        ...runtimeArgs(name, profile),
         ...args,
         reference,
         ...command,
@@ -116,6 +118,18 @@ export function testRuntime(
       ['--entrypoint', '/bin/sh'],
       ['-c', check.smoke],
     );
+    if (check.command === 'opencode') {
+      container(
+        `openshell-${index}`,
+        ['--user', '10001:10001', '--entrypoint', '/bin/sh'],
+        [
+          '-c',
+          'set -eu; test "$(id -u)" = 10001; test "$(id -g)" = 10001; test "$HOME" = /sandbox; test "${XDG_CACHE_HOME+x}" != x; ' +
+            check.smoke,
+        ],
+        { home: '/sandbox', uid: 10001, gid: 10001 },
+      );
+    }
   }
   const spec = resolve(out, `${image.id}-runtime-command.json`);
   writeFileSync(

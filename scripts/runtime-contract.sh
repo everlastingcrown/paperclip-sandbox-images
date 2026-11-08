@@ -17,7 +17,8 @@ python3 -m venv /tmp/python-contract-venv
 /tmp/python-contract-venv/bin/python -c 'import pathlib; p = pathlib.Path("/workspace/python-smoke.txt"); p.write_text("paperclip\n"); assert p.read_text() == "paperclip\n"; p.unlink()'
 rm -rf /tmp/python-contract-venv
 
-for directory in /workspace "$HOME" "$XDG_CACHE_HOME" "$TMPDIR"; do
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}"
+for directory in /workspace "$HOME" "${XDG_CACHE_HOME:-$HOME/.cache}" "$TMPDIR"; do
   test -d "$directory"
   touch "$directory/.contract-write"
   rm "$directory/.contract-write"

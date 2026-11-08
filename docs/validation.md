@@ -8,6 +8,8 @@ Adopt UID/GID `1000:1000`, `WORKDIR /workspace`, home `/home/paperclip`, and shi
 
 Tests use a read-only root filesystem, dropped capabilities, no privilege escalation, bounded resources, and no network. Writable mounts provide workspace, home/cache, and temporary storage. Checks cover writes, archive round-trips, declared CLI versions, and functional smoke commands. A synthetic shim command tests launch, argument delivery, SIGTERM forwarding, and preservation of child exit status.
 
+The runtime contract creates the effective cache directory (`${XDG_CACHE_HOME:-$HOME/.cache}`) before checking writes, including when the home mount starts empty. OpenCode smoke checks run with the default UID/GID 1000 and home, then with OpenShell-style UID/GID 10001, `HOME=/sandbox`, and writable mounts owned by that user. The OpenShell check requires `XDG_CACHE_HOME` to be unset so startup exercises the runtime home fallback.
+
 Authenticated API calls are excluded from required smoke tests. Add separately controlled integration checks where necessary; never bake credentials into images.
 
 ## Security and supply chain

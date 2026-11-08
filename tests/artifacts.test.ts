@@ -10,7 +10,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { blobPath, inspectOci, mergeOci } from '../src/oci.js';
 import { publish } from '../src/publish.js';
 import { digest } from '../src/plan.js';
-import { assertTested, runtimeArgs, testImages } from '../src/test-images.js';
+import {
+  assertTested,
+  runtimeArgs,
+  testImages,
+  testRuntime,
+} from '../src/test-images.js';
 import type { Runner } from '../src/command.js';
 import {
   fixture,
@@ -158,6 +163,46 @@ describe('OCI integrity', () => {
 });
 
 describe('runtime and scanner gates', () => {
+  it('checks OpenCode with an OpenShell user and home without a cache override', () => {
+    const image = {
+      ...planFor().images[0]!,
+      checks: [
+        {
+          command: 'opencode',
+          expected: '1.18.34',
+          smoke: 'opencode debug paths',
+        },
+      ],
+    };
+    const run = vi.fn<Runner>((_command, args) => {
+      if (args.includes('command -v "$1" >/dev/null && "$1" --version'))
+        return '1.18.34';
+      if (args[0] === 'logs') return 'signal-ready';
+      if (args[0] === 'inspect') return '42';
+      return '';
+    });
+    testRuntime(image, 'candidate', temp(), run);
+    const launches = run.mock.calls
+      .filter(([, args]) => args[0] === 'run')
+      .map(([, args]) => args);
+    const openshell = launches.find((args) => args.includes('10001:10001'))!;
+    expect(openshell).toBeDefined();
+    expect(openshell).toContain('HOME=/sandbox');
+    for (const path of ['/workspace', '/sandbox', '/tmp'])
+      expect(openshell).toContain(
+        `${path}:rw,nosuid,nodev,uid=10001,gid=10001,mode=0700`,
+      );
+    expect(openshell.at(-1)).toContain('opencode debug paths');
+    for (const args of launches)
+      expect(args.some((arg) => arg.startsWith('XDG_CACHE_HOME='))).toBe(false);
+    expect(
+      launches.some(
+        (args) =>
+          args.includes('HOME=/home/paperclip') &&
+          args.at(-1) === image.checks[0]!.smoke,
+      ),
+    ).toBe(true);
+  });
   it.each([
     ['codex-cli 0.114.0', true],
     ['codex-cli v0.114.0', true],

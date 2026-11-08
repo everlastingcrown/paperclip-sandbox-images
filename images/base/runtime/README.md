@@ -9,7 +9,7 @@ The `base-2` catalog entry publishes `sandbox-base:2.0.0` for Linux AMD64 and AR
 - Python 3.13 from Trixie, available as both `python` and `python3`, with `venv` support and pip inside virtual environments. Use `python -m venv /workspace/.venv` and `/workspace/.venv/bin/python -m pip install ...` for project dependencies. The offline runtime contract creates a virtual environment, checks pip, and exercises Python file I/O.
 - Bash/POSIX shell, CA certificates, coreutils, curl, GitHub CLI (`gh`), git, jq, ripgrep, tar, and tini. Distribution packages receive security updates at build time; APT versions intentionally follow Trixie updates. The offline runtime contract checks `gh --version` and JSON processing with `jq`; supply GitHub credentials per run when authenticated operations are needed.
 - A statically compiled `paperclip-agent-shim`, built with digest-pinned Go 1.27.3. The compiler is confined to the build stage. BuildKit cross-compiles the shim for the target architecture without downloading Go modules.
-- User/group `paperclip` (`1000:1000`), home `/home/paperclip`, workspace `/workspace`, cache `/home/paperclip/.cache`, and temporary directory `/tmp`. Home, cache, and workspace are owned by the runtime user.
+- User/group `paperclip` (`1000:1000`), home `/home/paperclip`, workspace `/workspace`, and temporary directory `/tmp`. The cache defaults to `$HOME/.cache`, so it follows the runtime home supplied by the container environment.
 - Entrypoint `/usr/bin/tini --` and default command `/usr/local/bin/paperclip-agent-shim`.
 
 The official Node image's existing UID/GID 1000 account is renamed to preserve the Paperclip contract. Node and npm are already on PATH; launch requires no profile changes or runtime installers. Toolsets extend this base using `FROM paperclip-parent`.
@@ -29,7 +29,7 @@ The provider mounts a readable `/run/paperclip/runtime-command.json`, for exampl
 
 The shim resolves the command on PATH and replaces itself with the command, preserving arguments, environment, signals, and exit status. Missing or invalid command files fail immediately. For an idle sandbox using provider exec, override the command explicitly, for example with `sleep infinity`.
 
-For a read-only root filesystem, supply writable mounts at `/workspace`, `/home/paperclip`, and `/tmp`, owned by UID/GID 1000. Create the cache directory in a mounted home or set `XDG_CACHE_HOME` to a writable directory. Supply credentials and egress policy per run. Provider isolation, workspace synchronization validation, and bridge authorization must be enforced outside this image.
+For a read-only root filesystem, supply writable mounts at `/workspace`, `/home/paperclip`, and `/tmp`, owned by UID/GID 1000. Cache files default to `$HOME/.cache`; if a sandbox runtime changes `HOME`, mount that home writable for the runtime UID/GID as well. Supply credentials and egress policy per run. Provider isolation, workspace synchronization validation, and bridge authorization must be enforced outside this image.
 
 ## Upstream provenance
 
