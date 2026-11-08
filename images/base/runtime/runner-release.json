@@ -1,11 +1,7 @@
 {
-  "release": "2026.1106.0",
-  "sourceRevision": "d69631b01b9c658f80bf8bed389863dce82643e1",
+  "release": "sha-6b7a08a6889073135e2651de2295402e09f4d70f",
+  "sourceRevision": "6b7a08a6889073135e2651de2295402e09f4d70f",
   "sourceImage": "ghcr.io/everlastingcrown/paperclip-backport:sha-6b7a08a6889073135e2651de2295402e09f4d70f@sha256:02631216fd0bde3c5da71621f65b644c81374820fcdcf77f7f2c7188ab2ca284",
-  "serverArtifact": {
-    "url": "https://registry.npmjs.org/@paperclipai/server/-/server-2026.1106.0.tgz",
-    "sha256": "fa2924b15606c5b7f9ef55a09fc321a61b02da7b2063b03e4d032f8da1cafe9d"
-  },
   "cliVersions": {
     "codex": "0.160.0",
     "claude": "2.1.286",
@@ -13,15 +9,13 @@
   },
   "platforms": {
     "linux-x64": {
-      "daemonSha256": "sha256:e0b08c0b23cafa3603b5f2613f1624a9bfca405a99508fd097b369b0ee81b000",
-      "packDigest": "sha256:9ba7212fb6d805a67b2cab3b4716ef8d1e5a8f4d30394eed4a62e38ef0f9aec0",
-      "serverDaemonSha256": "sha256:18eb3dabf51242e2a273907a07b1a39f4e38a85d5dbdf4ec7c81cbb2b293bdff",
+      "daemonSha256": "sha256:802ab9778a869c39f5c61e9da182435a5d5d9cb613dde442d4b21e270039a3ff",
+      "packDigest": "sha256:e0da8c779e6bd3e8aca6a84be98c2e170cf7dc8bc71d559ea8f6bf5dbd3c8187",
       "daemonPath": "bin/paperclip-runnerd"
     },
     "linux-arm64": {
-      "daemonSha256": "sha256:5f75b3f0896c4203e709042554cc1ba93043016f142964f07a31699fef56bb40",
-      "packDigest": "sha256:24527a66d4fe72b55f40bac7ed3b0e85cfc7ae0f6372f0c0c4ccbe47f7ca9548",
-      "serverDaemonSha256": "sha256:15baa26a11b5f585f0332b71941a77acd67b67abdfbb80e550897ba299e4b9dd",
+      "daemonSha256": "sha256:dd73c8041cff7fe2833512630fbf56d5a560a9faf2a64becec0316b72634abca",
+      "packDigest": "sha256:3d3a2fa95cbf7eec488cf8752739d4e3b2062f17ded009e31fcaf24253faf3cd",
       "daemonPath": "bin/paperclip-runnerd"
     }
   }

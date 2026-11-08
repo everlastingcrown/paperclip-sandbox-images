@@ -69,7 +69,6 @@ export function treeDigest(root) {
 
 export function verifyAssets(root) {
   const lock = readJson(join(root, 'runner-release.json'));
-  const release = readJson(join(root, 'server-release-manifest.json'));
   const target = `linux-${process.arch}`;
   const expected = lock.platforms[target];
   if (process.platform !== 'linux' || !expected)
@@ -82,12 +81,8 @@ export function verifyAssets(root) {
   )
     throw new Error('Runner asset origin mismatch');
   const imageSource = `image:/app/server/dist/vendor/paperclip-runner/${expected.daemonPath}`;
-  if (![imageSource, lock.serverArtifact.url].includes(origin.daemonSource))
+  if (origin.daemonSource !== imageSource)
     throw new Error('Unknown Runner daemon source');
-  const expectedDaemon =
-    origin.daemonSource === imageSource
-      ? expected.daemonSha256
-      : expected.serverDaemonSha256;
   const packRoot = join(root, 'provider-pack');
   const pack = readJson(join(packRoot, 'provider-pack.json'));
   const official = readFileSync(join(root, `${target}-provider-pack.json`));
@@ -99,9 +94,7 @@ export function verifyAssets(root) {
     pack.payload.runnerSourceRevision !== lock.sourceRevision ||
     pack.payload.target.platform !== 'linux' ||
     pack.payload.target.architecture !== process.arch ||
-    release.sourceRevision !== lock.sourceRevision ||
-    release.platforms[target].sha256 !== expected.serverDaemonSha256 ||
-    fileDigest(join(root, 'bin/paperclip-runnerd')) !== expectedDaemon
+    fileDigest(join(root, 'bin/paperclip-runnerd')) !== expected.daemonSha256
   ) {
     throw new Error('Runner assets do not match the pinned controller release');
   }

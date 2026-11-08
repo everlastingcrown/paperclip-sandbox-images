@@ -3,10 +3,9 @@ FROM ghcr.io/everlastingcrown/paperclip-backport:sha-6b7a08a6889073135e2651de229
 FROM node:24.22.0-trixie-slim@sha256:a6155384446670e9719bdc4fd0ebe4d4b29fb32a8d6aa523da3547a6cfbcf22c AS runner-assets
 ARG TARGETARCH
 WORKDIR /opt/paperclip-runner
-COPY runner-release.json server-release-manifest.json linux-x64-provider-pack.json linux-arm64-provider-pack.json verify-assets.mjs import-assets.mjs ./
+COPY runner-release.json linux-x64-provider-pack.json linux-arm64-provider-pack.json verify-assets.mjs import-assets.mjs ./
 COPY --from=runner-source /opt/paperclip-runner/provider-pack/ ./provider-pack/
-# Inspect the vendored image output first. The importer downloads only the
-# checksum-pinned matching server artifact when the platform daemon is absent.
+# Require the vendored backport daemon and verify its revision and checksum.
 RUN --mount=type=bind,from=runner-source,source=/app,target=/source \
     node import-assets.mjs /source "$TARGETARCH" \
     && node verify-assets.mjs /opt/paperclip-runner --record

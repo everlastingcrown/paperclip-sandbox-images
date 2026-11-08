@@ -14,7 +14,7 @@ The `base-2` catalog entry publishes `sandbox-base:2.0.0` for Linux AMD64 and AR
 
 The official Node image's existing UID/GID 1000 account is renamed to preserve the Paperclip contract. Node and npm are already on PATH; launch requires no profile changes or runtime installers. Toolsets extend this base using `FROM paperclip-parent`.
 
-The pinned official Paperclip v2026.1106.0 image supplies the Runner daemon and provider pack, with Codex
+The pinned Paperclip backport image supplies the Runner daemon and provider pack, with Codex
 0.160.0, Claude 2.1.286 (from the pinned Claude Agent SDK), and OpenCode 1.18.34.
 The direct `claude-code` alias uses the same pack launcher as `claude`.
 OpenCode's managed `/etc/opencode/opencode.json` disables snapshots.

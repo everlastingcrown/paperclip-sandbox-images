@@ -86,7 +86,6 @@ function fixture() {
   json('provider-pack/provider-pack.json', manifest);
   json(`${target}-provider-pack.json`, manifest);
   const sourceImage = 'ghcr.io/example/controller@sha256:' + 'b'.repeat(64);
-  const serverArtifact = { url: 'https://example.com/server.tgz' };
   json('asset-origin.json', {
     target,
     sourceImage,
@@ -97,21 +96,14 @@ function fixture() {
   json('runner-release.json', {
     sourceRevision,
     sourceImage,
-    serverArtifact,
     cliVersions: { codex: '1.2.3', claude: '1.2.3', opencode: '1.2.3' },
     platforms: {
       [target]: {
         daemonSha256,
-        serverDaemonSha256: digest('package daemon'),
         daemonPath: 'bin/paperclip-runnerd',
         packDigest: manifest.digest,
       },
     },
-  });
-  json('server-release-manifest.json', {
-    sourceRevision,
-    platforms: { [target]: { sha256: digest('package daemon') } },
-    remoteProviderPacks: { [target]: { digest: manifest.digest } },
   });
   return root;
 }
@@ -136,15 +128,6 @@ describe('release-matched Runner assets', () => {
       writeFileSync(join(root, path), JSON.stringify(manifest));
     } else writeFileSync(join(root, path), 'changed');
     expect(() => verifyAssets(root)).toThrow(error);
-  });
-  it('accepts only the recorded server daemon when fallback is used', () => {
-    const root = fixture();
-    const origin = JSON.parse(readFileSync(join(root, 'asset-origin.json')));
-    origin.daemonSource = 'https://example.com/server.tgz';
-    writeFileSync(join(root, 'asset-origin.json'), JSON.stringify(origin));
-    expect(() => verifyAssets(root)).toThrow('Runner assets');
-    writeFileSync(join(root, 'bin/paperclip-runnerd'), 'package daemon');
-    expect(() => verifyAssets(root)).not.toThrow();
   });
   it('rejects unrecorded asset origins', () => {
     const root = fixture();
@@ -196,6 +179,14 @@ describe('release-matched Runner assets', () => {
     expect(() => verifyAssets(root)).not.toThrow();
     writeFileSync(daemon, 'package daemon');
     expect(run).toThrow('Daemon does not match controller release');
+    writeFileSync(daemon, 'release daemon');
+    writeFileSync(
+      join(source, 'server/dist/build-info.json'),
+      JSON.stringify({ commit: 'b'.repeat(40) }),
+    );
+    expect(run).toThrow('Image source revision mismatch');
+    rmSync(daemon);
+    expect(run).toThrow('Pinned image Runner daemon missing');
   });
   it('records the selected asset source, daemon bytes, CLI versions and package licenses', () => {
     const root = fixture();

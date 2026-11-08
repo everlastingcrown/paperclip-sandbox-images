@@ -1,6 +1,6 @@
 {
   "schema": "paperclip-runner/remote-provider-pack/v1",
-  "digest": "sha256:9ba7212fb6d805a67b2cab3b4716ef8d1e5a8f4d30394eed4a62e38ef0f9aec0",
+  "digest": "sha256:e0da8c779e6bd3e8aca6a84be98c2e170cf7dc8bc71d559ea8f6bf5dbd3c8187",
   "payload": {
     "pins": {
       "nodeMinimum": "24.11.0",
@@ -15,9 +15,9 @@
       "platform": "linux",
       "architecture": "x64"
     },
-    "runnerSourceRevision": "d69631b01b9c658f80bf8bed389863dce82643e1",
-    "distDigest": "sha256:22b5a42d29b9f29ff72d8b6744095fc040d59ac2f33f18bc0bc6b7ba4313e27e",
-    "bridgeDigest": "sha256:82a01536087637096c43550b2028112c56c064afe51e75b163d229fb3744b675",
+    "runnerSourceRevision": "6b7a08a6889073135e2651de2295402e09f4d70f",
+    "distDigest": "sha256:d050fc4792a7b75b0566de5b14c3a4f99fdf43c0474327bfdea6a3d86e11dc1c",
+    "bridgeDigest": "sha256:c8417f2da66363ffe1bb7fc60c92c3168d0b8a5fc84a62fb68d153d458117666",
     "acpxProfileDigests": {
       "grok": "sha256:f0b698395a3704ed2ffaf84ea19bdb20c36c8a0a70b7c629c7b6ffe144e59e55",
       "claude": "sha256:9d73d1f0f121fb96cc8badb28c22d5bff02d8582eb2e40360a81c189e1b9422a",
@@ -70,7 +70,7 @@
       },
       "productionLock": {
         "path": "pnpm-lock.yaml",
-        "sha256": "sha256:651e4406bb13d1f0945165a65fdd0a1f91eb14a4dfa066e50f2b7899bb0a5b79"
+        "sha256": "sha256:342a01e487a68d0ad9cb8d8852a0ffed4dd7b0fa58e2e047d1064e9340fe6f57"
       },
       "opencodeCommand": {
         "path": "node_modules/.bin/opencode",
@@ -86,7 +86,7 @@
       },
       "acpxSidecar": {
         "path": "dist/cli/acpx-runtime-sidecar.cjs",
-        "sha256": "sha256:10824ded8b61d29e56427310bee9cb981ad950c28ad35e1b7b32cae810798f51"
+        "sha256": "sha256:0e59390abe2baf331a359fa46d8ea43f1bff020d57c8e308d8227d93203ee727"
       }
     }
   }
