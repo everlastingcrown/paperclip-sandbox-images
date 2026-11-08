@@ -2,7 +2,7 @@ export const platforms = ['linux/amd64', 'linux/arm64'] as const;
 export type Platform = (typeof platforms)[number];
 export interface Image {
   id: string;
-  layer: 'base' | 'harness' | 'toolset';
+  layer: 'base' | 'toolset';
   repository: string;
   capability: string;
   version: string;
@@ -15,11 +15,11 @@ export interface Image {
   checks: { command: string; expected: string; smoke: string }[];
 }
 export interface Catalog {
-  schemaVersion: 1;
+  schemaVersion: 2;
   images: Image[];
 }
 export interface Plan {
-  schemaVersion: 1;
+  schemaVersion: 2;
   registry: string;
   source: string;
   build: string;

@@ -11,7 +11,7 @@ await writeFile(
   'index.html',
   "<button onclick=\"document.querySelector('output').textContent='1'\">Increment</button><output>0</output>",
 );
-// BuildKit may run both harness variants in the same network namespace.
+// BuildKit may run independent toolsets in the same network namespace.
 // Use this server's allocated port so each check reaches its own page.
 const server = createServer((request, response) =>
   serveHandler(request, response, { public: resolve('.') }),

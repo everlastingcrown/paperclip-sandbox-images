@@ -1,11 +1,10 @@
-# Expo toolset 1.0.0
+# Expo toolset 2.0.0
 
-The Expo toolset supplies the same tools for Expo web development and Android builds over either harness, using the shared `Dockerfile` and `base-1` runtime. The catalog registers these variants under the configured registry namespace:
+The Expo toolset supplies the same tools for Expo web development and Android builds over the shared `base-2` runtime. The catalog registers this image under the configured registry namespace:
 
-| Catalog ID        | Parent            | Version tag                                   |
-| ----------------- | ----------------- | --------------------------------------------- |
-| `expo-1-codex`    | `codex-0-162-1`   | `sandbox-expo-codex:1.0.0-codex-0.162.1`      |
-| `expo-1-opencode` | `opencode-1-19-0` | `sandbox-expo-opencode:1.0.0-opencode-1.19.0` |
+| Catalog ID | Parent   | Version tag          |
+| ---------- | -------- | -------------------- |
+| `expo-2`   | `base-2` | `sandbox-expo:2.0.0` |
 
 The images supply shared development tools; project source, dependencies, caches, and credentials are provided at runtime.
 
@@ -13,7 +12,7 @@ The images supply shared development tools; project source, dependencies, caches
 | ------------------------------------------------------------------- | ----- | ----- |
 | Node.js 24/npm                                                      | Yes   | Yes   |
 | Playwright 1.61.0 Chromium and static server `serve` 14.2.6         | Yes   | Yes   |
-| Java 17, Python 3, C/C++ host compiler and Make                     | Yes   | Yes   |
+| Java 21, Python 3, C/C++ host compiler and Make                     | Yes   | Yes   |
 | Android SDK 36, Build Tools 36.0.0, NDK 27.1.12297006, CMake 3.22.1 | Yes   | No    |
 
 Expo CLI, React Native, TypeScript, and test frameworks come from each project's dependencies. Choose projects compatible with the tool versions above; the bundle does not select or upgrade a project's Expo SDK version. Keep the project's Playwright version at 1.61.0 to match the baked Chromium revision. Different Android SDK/NDK requirements or Playwright browser revisions require a corresponding toolset update.
@@ -57,16 +56,16 @@ Prebuild modifies the project's native Android directory; review generated chang
 
 ## Validation
 
-`paperclip-expo --version` reports the bundle release. `paperclip-expo check` compiles a host C object, compiles/runs a Java 17 class, exercises Python SQLite, serves a local page, launches Chromium, clicks its UI, and captures a screenshot. Generated native binaries are not executed because runtime tmpfs mounts are `noexec`. On AMD64 it also checks the SDK platform/license, runs AAPT2/CMake/Ninja, and compiles an Android ARM64 object with the NDK. The catalog repeats these checks offline under the restricted runtime contract and inherits the selected harness's smoke check. Full project tests require a checkout and its dependencies.
+`paperclip-expo --version` reports the bundle release. `paperclip-expo check` compiles a host C object, compiles/runs a Java 21 class, exercises Python SQLite, serves a local page, launches Chromium, clicks its UI, and captures a screenshot. Generated native binaries are not executed because runtime tmpfs mounts are `noexec`. On AMD64 it also checks the SDK platform/license, runs AAPT2/CMake/Ninja, and compiles an Android ARM64 object with the NDK. The catalog repeats these checks offline under the restricted runtime contract and inherits all base CLI smoke checks. Full project tests require a checkout and its dependencies.
 
 To build the entire chain without relying on previously published parents:
 
 ```sh
-pnpm images plan --select base-1
+pnpm images plan --select base-2
 pnpm images build --platform linux/amd64
 pnpm images test --platform linux/amd64
 ```
 
-Repeat the build/test commands on a native ARM64 worker. Selecting `base-1` also includes the other active harness descendants. To build just this toolset against an already published parent, use `pnpm images plan --select expo-1-codex --resolve` or `pnpm images plan --select expo-1-opencode --resolve` instead. Both architecture tests and scans must pass before publication.
+Repeat the build/test commands on a native ARM64 worker. Selecting `base-2` also includes both toolsets. To build just this toolset against an already published parent, use `pnpm images plan --select expo-2 --resolve` instead. Both architecture tests and scans must pass before publication.
 
 Sources: [Android SDK Manager](https://developer.android.com/tools/sdkmanager), [Google SDK package metadata](https://dl.google.com/android/repository/repository2-1.xml), [NDK downloads](https://developer.android.com/ndk/downloads), and [Playwright shared browser installation](https://playwright.dev/docs/browsers#managing-browser-binaries).

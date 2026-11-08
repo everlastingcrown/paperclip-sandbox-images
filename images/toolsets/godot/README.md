@@ -1,13 +1,12 @@
-# Godot toolset 1.0.0
+# Godot toolset 2.0.0
 
 Generic Godot development tools over the shared non-root Paperclip runtime. Clone
 or mount your project into `/workspace`; source, addons, project configuration,
 credentials, and project dependencies are supplied at runtime.
 
-| Catalog ID         | Parent            | Version tag                                    |
-| ------------------ | ----------------- | ---------------------------------------------- |
-| `godot-1-codex`    | `codex-0-162-1`   | `sandbox-godot-codex:1.0.0-codex-0.162.1`      |
-| `godot-1-opencode` | `opencode-1-19-0` | `sandbox-godot-opencode:1.0.0-opencode-1.19.0` |
+| Catalog ID | Parent   | Version tag           |
+| ---------- | -------- | --------------------- |
+| `godot-2`  | `base-2` | `sandbox-godot:2.0.0` |
 
 Both Linux AMD64 and ARM64 images include:
 
@@ -77,12 +76,12 @@ Godot's temporary export files and removes them on exit. No external network,
 project checkout, or credentials are required. Generated native binaries are not executed on `noexec` mounts.
 
 The catalog repeats these checks with a read-only root filesystem, fresh writable
-home, no external network, and inherited harness checks. Both native architectures
+home, no external network, and inherited base checks. Both native architectures
 must pass the runtime checks and scans before publication.
 
 ```sh
 # Select the full chain when parents have not already been published.
-pnpm images plan --select base-1
+pnpm images plan --select base-2
 pnpm images build --platform linux/amd64
 pnpm images test --platform linux/amd64
 

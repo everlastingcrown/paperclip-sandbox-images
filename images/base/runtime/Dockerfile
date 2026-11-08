@@ -1,3 +1,16 @@
+FROM ghcr.io/paperclipai/paperclip:2026.1106.0@sha256:d6584f05cf57a4b26c117eb083725f18c1fe69ddafa7d16c9f8cce83f6fa17da AS runner-source
+
+FROM node:24.22.0-trixie-slim@sha256:a6155384446670e9719bdc4fd0ebe4d4b29fb32a8d6aa523da3547a6cfbcf22c AS runner-assets
+ARG TARGETARCH
+WORKDIR /opt/paperclip-runner
+COPY runner-release.json server-release-manifest.json linux-x64-provider-pack.json linux-arm64-provider-pack.json verify-assets.mjs import-assets.mjs ./
+COPY --from=runner-source /opt/paperclip-runner/provider-pack/ ./provider-pack/
+# Inspect the vendored image output first. The importer downloads only the
+# checksum-pinned matching server artifact when the platform daemon is absent.
+RUN --mount=type=bind,from=runner-source,source=/app,target=/source \
+    node import-assets.mjs /source "$TARGETARCH" \
+    && node verify-assets.mjs /opt/paperclip-runner --record
+
 FROM --platform=$BUILDPLATFORM golang:1.27.3-bookworm@sha256:21ade014faf952365b9ecbd8dbdb87176fbacb82fac9fb132d9f2a7b8cc3f132 AS shim-build
 
 ARG TARGETOS
@@ -7,10 +20,10 @@ COPY agent-shim/go.mod agent-shim/main.go agent-shim/runtime_command.go ./
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOPROXY=off GOTOOLCHAIN=local \
     go build -mod=readonly -trimpath -buildvcs=false -ldflags='-s -w' -o /out/paperclip-agent-shim .
 
-FROM node:24.22.0-bookworm-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS runtime
+FROM node:24.22.0-trixie-slim@sha256:a6155384446670e9719bdc4fd0ebe4d4b29fb32a8d6aa523da3547a6cfbcf22c AS runtime
 
 LABEL org.opencontainers.image.title="Paperclip sandbox base runtime" \
-    org.opencontainers.image.description="Shared Node.js and Python runtime and Paperclip agent shim for sandbox harnesses"
+    org.opencontainers.image.description="Release-matched Paperclip Runner, provider CLIs, Node.js and Python runtime"
 
 # Refresh distribution security fixes on rebuilds; intentionally track APT packages.
 # hadolint ignore=DL3008
@@ -19,12 +32,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bash ca-certificates coreutils curl gh git jq \
         python3 python-is-python3 python3-venv ripgrep tar tini \
-    # Reject stale package mirrors/caches missing the Bookworm security fixes
-    # for CVE-2026-111497 (Brotli) and CVE-2026-84782 (OpenSSL).
-    && dpkg-query -W libbrotli1 libssl3 openssl \
-    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libbrotli1)" ge '1.0.9-2+deb12u1' \
-    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libssl3)" ge '3.0.22-1~deb12u2' \
-    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' openssl)" ge '3.0.22-1~deb12u2' \
+    # Trixie uses the time64 OpenSSL package. Scans gate security updates.
+    && dpkg-query -W libbrotli1 libssl3t64 openssl \
+    && python3 -c 'import sys; assert sys.version_info[:2] == (3, 13)' \
     && rm -rf /var/lib/apt/lists/* \
     && groupmod --new-name paperclip node \
     && usermod --login paperclip --home /home/paperclip --move-home --shell /bin/bash node \
@@ -61,7 +71,17 @@ RUN curl --fail --silent --show-error --location \
 COPY --from=shim-build --chmod=0755 /out/paperclip-agent-shim /usr/local/bin/paperclip-agent-shim
 COPY agent-shim/LICENSE /usr/local/share/licenses/paperclip-agent-shim/LICENSE
 
-ENV HOME=/home/paperclip \
+COPY --from=runner-assets /opt/paperclip-runner/ /opt/paperclip-runner/
+COPY --chmod=0755 cli-wrapper /usr/local/bin/codex
+RUN cp /usr/local/bin/codex /usr/local/bin/claude \
+    && cp /usr/local/bin/codex /usr/local/bin/opencode \
+    && ln -s claude /usr/local/bin/claude-code \
+    && ln -s /opt/paperclip-runner/bin/paperclip-runnerd /usr/local/bin/paperclip-runnerd \
+    && install -d -m 0755 /etc/opencode \
+    && printf '%s\n' '{"snapshot":false}' > /etc/opencode/opencode.json
+
+ENV PAPERCLIP_RUNNER_REMOTE_PROVIDER_PACK_PATH=/opt/paperclip-runner/provider-pack \
+    HOME=/home/paperclip \
     XDG_CACHE_HOME=/home/paperclip/.cache \
     TMPDIR=/tmp
 

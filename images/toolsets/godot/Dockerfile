@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.title="Paperclip Godot toolset" \
 
 USER 0:0
 ARG TARGETARCH
-ARG TOOLSET_VERSION=1.0.0
+ARG TOOLSET_VERSION=2.0.0
 ARG GODOT_VERSION=4.6.3
 ARG GODOT_AMD64_SHA256=d0bc2113065e481c9c2c2b2c37daa4e8be3fe9e27f0ab9ab0b6096e9a37907f3
 ARG GODOT_ARM64_SHA256=90c70382eee1542904bf507b9bdc6e62a230ac73fd214bf3887a9e0a4d85aeed
@@ -34,7 +34,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         unzip sqlite3 libfontconfig1 libx11-6 libxcursor1 libxinerama1 \
-        libgl1 libegl1 libasound2 libxrandr2 libxi6 libgl1-mesa-dri \
+        libgl1 libegl1 libasound2t64 libxrandr2 libxi6 libgl1-mesa-dri \
         xvfb xauth xkb-data x11-xkb-utils x11-utils \
     && install -d -m 1777 /tmp/.X11-unix \
     && rm -rf /var/lib/apt/lists/*

@@ -1,10 +1,15 @@
+import { execFileSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import {
   affected,
+  assertPlanVersion,
   createPlan,
   immutableTag,
   resolveParents,
 } from '../src/plan.js';
+import { releaseCatalog } from '../src/catalog.js';
 import { bakeDefinition, build } from '../src/build.js';
 import type { Runner } from '../src/command.js';
 import { fixture, planFor, source, temp } from './helpers.js';
@@ -17,18 +22,18 @@ describe('affected image planning', () => {
   it('propagates base changes through every maintained version', () => {
     expect(ids(['images/base/runtime/Dockerfile'])).toHaveLength(5);
   });
-  it('selects only a changed harness and its descendants', () => {
-    expect(ids([], ['codex-old'])).toEqual(['codex-old', 'python-old-codex']);
+  it('selects a toolset independently of other toolsets', () => {
+    expect(ids([], ['codex-old'])).toEqual(['codex-old']);
   });
   it('tracks shared recipes, directories, and shared inputs', () => {
-    expect(ids(['images/harnesses/codex/install.sh'])).toHaveLength(4);
+    expect(ids(['images/toolsets/codex/install.sh'])).toHaveLength(2);
     expect(ids(['shared/paperclip-shim/main.go'])).toHaveLength(5);
     expect(ids(['src/plan.ts'])).toHaveLength(5);
   });
   it('skips documentation-only changes and handles empty catalogs', () => {
     expect(ids(['README.md', 'docs/architecture.md'])).toEqual([]);
     expect(
-      affected({ schemaVersion: 1, images: [] }, fixture(), [
+      affected({ schemaVersion: 2, images: [] }, fixture(), [
         'catalog/images.json',
       ]),
     ).toEqual([]);
@@ -39,29 +44,68 @@ describe('affected image planning', () => {
     current.images[1]!.args.CODEX_VERSION = 'changed';
     expect(
       affected(current, previous, ['catalog/images.json']).map((i) => i.id),
-    ).toEqual(['codex-old', 'python-old-codex']);
+    ).toEqual(['codex-old']);
   });
   it('builds the replacement latest after retirement', () => {
     const previous = fixture();
     const current = fixture();
     current.images = current.images.filter(
-      (i) => !['codex-new', 'python-new-codex'].includes(i.id),
+      (i) => !['codex-new', 'python-new'].includes(i.id),
     );
     expect(
       affected(current, previous, ['catalog/images.json']).map((i) => i.id),
-    ).toEqual(['codex-old', 'python-old-codex']);
+    ).toEqual(['codex-old', 'python-old']);
+  });
+  it('rebuilds all images for a historical v1 baseline without validating its graph', () => {
+    const previous = releaseCatalog({
+      schemaVersion: 1,
+      images: [{ layer: 'harness', parent: 'retired' }],
+    });
+    expect(affected(fixture(), previous, []).map((i) => i.id)).toEqual(
+      fixture().images.map((i) => i.id),
+    );
+    expect(() => releaseCatalog({ schemaVersion: 3, images: [] })).toThrow(
+      'Invalid catalog',
+    );
   });
   it('rejects unknown manual selections', () =>
     expect(() => ids([], ['typo'])).toThrow('Unknown image'));
 });
 
 describe('build plans', () => {
-  it('emits unique build tags and inherits harness checks for toolsets', () => {
+  it('rejects v1 plans with a regeneration instruction', () => {
+    expect(() => assertPlanVersion({ schemaVersion: 1 })).toThrow(
+      'regenerate with pnpm images plan',
+    );
+    expect(() => assertPlanVersion(planFor())).not.toThrow();
+  });
+  it('rejects a v1 plan at the build CLI before invoking build tools', () => {
+    const path = join(temp(), 'v1-plan.json');
+    writeFileSync(path, JSON.stringify({ schemaVersion: 1 }));
+    expect(() =>
+      execFileSync(
+        process.execPath,
+        [
+          '--import',
+          'tsx',
+          resolve('src/cli.ts'),
+          'build',
+          '--platform',
+          'linux/amd64',
+          '--plan',
+          path,
+        ],
+        { stdio: 'pipe' },
+      ),
+    ).toThrow('regenerate with pnpm images plan');
+  });
+  it('emits unique build tags and inherits base checks for toolsets', () => {
     const plan = planFor();
     expect(immutableTag(plan.images[3]!, plan)).toBe(
-      `3.13.2-codex-0.99.0-sha-${source.slice(0, 12)}-123-1`,
+      `3.13.2-sha-${source.slice(0, 12)}-123-1`,
     );
     expect(plan.images[3]!.checks.map((c) => c.command)).toEqual([
+      'node',
       'codex',
       'python',
     ]);
@@ -79,10 +123,8 @@ describe('build plans', () => {
     resolveParents(plan, catalog, run);
     resolveParents(plan, catalog, run);
     expect(run).toHaveBeenCalledTimes(1);
-    expect(plan.externalParents['codex-old']).toMatch(/sandbox-codex@sha256:/);
-    expect(immutableTag(plan.images[0]!, plan)).toContain(
-      '3.13.2-codex-0.99.0',
-    );
+    expect(plan.externalParents['base-1']).toMatch(/sandbox-base@sha256:/);
+    expect(immutableTag(plan.images[0]!, plan)).toContain('3.13.2');
   });
   it('does not accept an unpinned parent resolution', () => {
     const catalog = fixture();
@@ -115,7 +157,7 @@ describe('build plans', () => {
     expect(run.mock.calls[0]?.[1]).toContain('--no-cache');
     run.mockClear();
     build(
-      planFor({ schemaVersion: 1, images: [] }),
+      planFor({ schemaVersion: 2, images: [] }),
       'linux/amd64',
       temp(),
       run,

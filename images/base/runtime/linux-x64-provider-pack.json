@@ -1,0 +1,93 @@
+{
+  "schema": "paperclip-runner/remote-provider-pack/v1",
+  "digest": "sha256:9ba7212fb6d805a67b2cab3b4716ef8d1e5a8f4d30394eed4a62e38ef0f9aec0",
+  "payload": {
+    "pins": {
+      "nodeMinimum": "24.11.0",
+      "codex": "0.160.0",
+      "opencode": "1.18.34",
+      "acpx": "0.13.1",
+      "grok": "1.0.13",
+      "claudeAcp": "0.73.0",
+      "codexAcp": "1.6.2"
+    },
+    "target": {
+      "platform": "linux",
+      "architecture": "x64"
+    },
+    "runnerSourceRevision": "d69631b01b9c658f80bf8bed389863dce82643e1",
+    "distDigest": "sha256:22b5a42d29b9f29ff72d8b6744095fc040d59ac2f33f18bc0bc6b7ba4313e27e",
+    "bridgeDigest": "sha256:82a01536087637096c43550b2028112c56c064afe51e75b163d229fb3744b675",
+    "acpxProfileDigests": {
+      "grok": "sha256:f0b698395a3704ed2ffaf84ea19bdb20c36c8a0a70b7c629c7b6ffe144e59e55",
+      "claude": "sha256:9d73d1f0f121fb96cc8badb28c22d5bff02d8582eb2e40360a81c189e1b9422a",
+      "codex": "sha256:443491f4e814501a5dc47347e4510e84faeec9c9382e2d4e53bfe69386d5aabc"
+    },
+    "providers": {
+      "pi": {
+        "version": "1.0.0",
+        "profileDigest": "sha256:4918a4d5472d66b22b1ec642b68b5c60a8092a39c84ec1ab1c9ad0289cb8c68c",
+        "closureDigest": "sha256:713b1fdff42fb56a1518bdc084f181d70bee8ebadc3e4b1d76321ed9108c8410",
+        "qualification": "qualified",
+        "path": "provider-assets/pi/linux-x64",
+        "sha256": "sha256:64d997d31ccebff54b929548fe5189b5355c96331a9b312f1d08580c7fea5518"
+      },
+      "cursor": {
+        "version": "2026.09.26-dd393fe",
+        "profileDigest": "sha256:ac8092119542c8fbe95dae18ba5ef4d3689803fec56b7d2735fa193eea42f59b",
+        "closureDigest": "sha256:eadb8bb8ffb0450455b15b88c9b230307a9e149958a0c452d16dd157b4633d74",
+        "qualification": "qualified",
+        "path": "provider-assets/cursor/linux-x64",
+        "sha256": "sha256:cb7d29474ed87003f5f5920f9ed234aa005c2578314316cd4b66fdf9a76462c9"
+      },
+      "copilot": {
+        "version": "1.0.88",
+        "profileDigest": "sha256:d490dacdab02051d24c84aae49ac6fb12b8226cf8a47b014ec53f3d3a8410a94",
+        "closureDigest": "sha256:a3d8f4367cfa1694d79e3f8b7930b6fbfe42a229c272b375b11951d631db8d07",
+        "qualification": "qualified",
+        "path": "provider-assets/copilot/linux-x64",
+        "sha256": "sha256:005168d899988d745afe24b83512c002b402bba7bd0f712fa303820e60295a76"
+      }
+    },
+    "candidateProviders": {
+      "pi": {
+        "version": "1.0.0",
+        "profileDigest": "sha256:4918a4d5472d66b22b1ec642b68b5c60a8092a39c84ec1ab1c9ad0289cb8c68c",
+        "closureDigest": "sha256:713b1fdff42fb56a1518bdc084f181d70bee8ebadc3e4b1d76321ed9108c8410",
+        "qualification": "qualified",
+        "path": "provider-assets/pi/linux-x64",
+        "sha256": "sha256:64d997d31ccebff54b929548fe5189b5355c96331a9b312f1d08580c7fea5518"
+      }
+    },
+    "artifacts": {
+      "grokLauncher": {
+        "path": "dist/providers/grok/launcher.cjs",
+        "sha256": "sha256:f0b698395a3704ed2ffaf84ea19bdb20c36c8a0a70b7c629c7b6ffe144e59e55"
+      },
+      "nodeCommand": {
+        "path": "node_modules/node/bin/node",
+        "sha256": "sha256:904a6d3484241d466989f9df9ba3aab822b1496191bdb28230eb491a55c32a52"
+      },
+      "productionLock": {
+        "path": "pnpm-lock.yaml",
+        "sha256": "sha256:651e4406bb13d1f0945165a65fdd0a1f91eb14a4dfa066e50f2b7899bb0a5b79"
+      },
+      "opencodeCommand": {
+        "path": "node_modules/.bin/opencode",
+        "sha256": "sha256:abed4de9c27d7add7180a13159d5e535490ee46993d650db150a91d53cbe544a"
+      },
+      "opencodeExecutable": {
+        "path": "node_modules/opencode-ai/bin/opencode.exe",
+        "sha256": "sha256:9ca0b9953d49997601655e54f846a3efa464f237e47c6f1b04716d0f2e64c4c2"
+      },
+      "opencodeProxy": {
+        "path": "dist/cli/opencode-app-server-proxy.cjs",
+        "sha256": "sha256:2d97c0d6f11b552d8a2755bb35659882baf51c9c9341f8e41fc137825abca412"
+      },
+      "acpxSidecar": {
+        "path": "dist/cli/acpx-runtime-sidecar.cjs",
+        "sha256": "sha256:10824ded8b61d29e56427310bee9cb981ad950c28ad35e1b7b32cae810798f51"
+      }
+    }
+  }
+}

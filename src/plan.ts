@@ -11,12 +11,13 @@ export const watched = (file: string, path: string): boolean =>
 
 export function affected(
   catalog: Catalog,
-  previous: Catalog,
+  previous: Catalog | null,
   files: string[],
   selected?: string[],
 ): Image[] {
   const ids = new Set<string>();
   const all =
+    previous === null ||
     selected?.includes('all') ||
     files.some((file) =>
       [
@@ -38,10 +39,10 @@ export function affected(
       throw new Error(`Unknown image: ${id}`);
     ids.add(id);
   }
-  const oldLatest = latestEntries(previous.images);
+  const oldLatest = latestEntries(previous?.images ?? []);
   const newLatest = latestEntries(catalog.images);
   for (const image of catalog.images) {
-    const old = previous.images.find((i) => i.id === image.id);
+    const old = previous?.images.find((i) => i.id === image.id);
     // A context is deliberately treated as a directory-wide dependency.
     if (
       all ||
@@ -86,14 +87,14 @@ export function createPlan(
     ...image.checks,
   ];
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     registry,
     source,
     build,
     images: images.map((i) => ({ ...i, checks: inheritedChecks(i) })),
     latest: latestEntries(catalog.images),
     versionTags: Object.fromEntries(
-      catalog.images.map((i) => [i.id, versionTag(i, catalog.images)]),
+      catalog.images.map((i) => [i.id, versionTag(i)]),
     ),
     externalParents: {},
   };
@@ -121,10 +122,17 @@ export function resolveParents(
       'inspect',
       '--format',
       '{{.Digest}}',
-      `docker://${name}:${versionTag(parent, catalog.images)}`,
+      `docker://${name}:${versionTag(parent)}`,
     ]);
     if (!/^sha256:[a-f0-9]{64}$/.test(hash))
       throw new Error(`Invalid parent digest: ${parent.id}`);
     plan.externalParents[parent.id] = `${name}@${hash}`;
   }
+}
+
+export function assertPlanVersion(data: { schemaVersion?: unknown }): void {
+  if (data.schemaVersion !== 2)
+    throw new Error(
+      'Unsupported build plan version; regenerate with pnpm images plan',
+    );
 }

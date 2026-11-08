@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+name=$(basename "$0")
+[ "$name" != claude-code ] || name=claude
+exec "/opt/paperclip-runner/provider-pack/node_modules/.bin/${name}" "$@"

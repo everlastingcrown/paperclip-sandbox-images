@@ -9,7 +9,7 @@ import { fixture } from './helpers.js';
 
 describe('catalog validation', () => {
   it('accepts an empty catalog and maintained fixture versions', () => {
-    expect(() => assertCatalog({ schemaVersion: 1, images: [] })).not.toThrow();
+    expect(() => assertCatalog({ schemaVersion: 2, images: [] })).not.toThrow();
     expect(() => assertCatalog(fixture())).not.toThrow();
   });
   it.each([
@@ -77,6 +77,31 @@ describe('catalog validation', () => {
     change(catalog);
     expect(() => assertCatalog(catalog)).toThrow();
   });
+  it('rejects retired layers and active v1 catalogs', () => {
+    const catalog = fixture();
+    expect(() => assertCatalog({ ...catalog, schemaVersion: 1 })).toThrow(
+      'Invalid catalog',
+    );
+    expect(() =>
+      assertCatalog({
+        ...catalog,
+        images: [catalog.images[0], { ...catalog.images[1], layer: 'harness' }],
+      }),
+    ).toThrow('Invalid catalog');
+  });
+  it('rejects the same capability tag across different base versions', () => {
+    const catalog = fixture();
+    catalog.images.push({
+      ...catalog.images[0]!,
+      id: 'base-2',
+      version: '2.0.0',
+    });
+    const newer = catalog.images[4]!;
+    newer.parent = 'base-2';
+    newer.version = catalog.images[3]!.version;
+    newer.checks.at(-1)!.expected = newer.version;
+    expect(() => assertCatalog(catalog)).toThrow('Tag collision');
+  });
   it('detects cycles independently of layer checks', () => {
     const catalog = fixture();
     catalog.images[0]!.parent = 'codex-old';
@@ -88,32 +113,28 @@ describe('catalog validation', () => {
 });
 
 describe('tags', () => {
-  it('anchors toolset tags to both exact versions', () => {
+  it('uses plain capability versions for toolset tags', () => {
     const { images } = fixture();
-    expect(versionTag(images[3]!, images)).toBe('3.13.2-codex-0.99.0');
+    expect(versionTag(images[3]!)).toBe('3.13.2');
   });
-  it('uses semver ordering and the harness tie-breaker for latest', () => {
+  it('uses SemVer ordering for latest', () => {
     expect(latestEntries(fixture().images)).toEqual({
       'sandbox-base': 'base-1',
       'sandbox-codex': 'codex-new',
-      'sandbox-python-codex': 'python-new-codex',
+      'sandbox-python': 'python-new',
     });
   });
-  it('excludes prereleases of the primary capability and harness', () => {
+  it('excludes capability prereleases independently of parents', () => {
     const catalog = fixture();
     catalog.images[2]!.version = '1.0.0-beta.1';
     expect(latestEntries(catalog.images)['sandbox-codex']).toBe('codex-old');
-    expect(latestEntries(catalog.images)['sandbox-python-codex']).toBe(
-      'python-old-codex',
-    );
+    expect(latestEntries(catalog.images)['sandbox-python']).toBe('python-new');
     catalog.images[0]!.version = '2.0.0-rc.1';
     expect(latestEntries(catalog.images)['sandbox-base']).toBeUndefined();
   });
-  it('prefers primary toolset version over harness version', () => {
+  it('selects the highest stable toolset version', () => {
     const catalog = fixture();
     catalog.images[3]!.version = '3.14.0';
-    expect(latestEntries(catalog.images)['sandbox-python-codex']).toBe(
-      'python-old-codex',
-    );
+    expect(latestEntries(catalog.images)['sandbox-python']).toBe('python-old');
   });
 });

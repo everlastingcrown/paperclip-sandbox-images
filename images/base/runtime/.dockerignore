@@ -4,3 +4,10 @@
 !agent-shim/main.go
 !agent-shim/runtime_command.go
 !agent-shim/LICENSE
+!runner-release.json
+!server-release-manifest.json
+!linux-x64-provider-pack.json
+!linux-arm64-provider-pack.json
+!verify-assets.mjs
+!import-assets.mjs
+!cli-wrapper

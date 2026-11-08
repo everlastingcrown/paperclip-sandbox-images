@@ -2,15 +2,15 @@
 
 ## Tags
 
-| Image   | Version alias                               | `latest` selection                             |
-| ------- | ------------------------------------------- | ---------------------------------------------- |
-| Base    | `sandbox-base:1.0.0`                        | Highest stable contract release                |
-| Harness | `sandbox-codex:0.114.0`                     | Highest stable harness release                 |
-| Toolset | `sandbox-python-codex:3.13.2-codex-0.114.0` | Highest stable capability, then stable harness |
+| Image | Version alias         | `latest` selection                |
+| ----- | --------------------- | --------------------------------- |
+| Base  | `sandbox-base:2.0.0`  | Highest stable contract release   |
+| Expo  | `sandbox-expo:2.0.0`  | Highest stable capability release |
+| Godot | `sandbox-godot:2.0.0` | Highest stable capability release |
 
 Immutable build tags append `-sha-<12-character-SHA>-<run-ID>-<attempt>`. Weekly rebuilds produce distinct tags even with unchanged source versions. GHCR does not enforce immutability; repository permissions protect these tags, and operators must not overwrite them.
 
-Prerelease capabilities and toolsets on prerelease harnesses cannot own `latest`. Ordering is numeric SemVer: `0.114.0` outranks `0.99.0`. No major/minor aliases are generated. Use immutable tags or digests for reproducibility.
+Prerelease capability versions cannot own `latest`. Ordering is numeric SemVer: `0.114.0` outranks `0.99.0`. No major/minor aliases are generated. Use immutable tags or digests for reproducibility.
 
 ## Release flow
 
@@ -43,3 +43,8 @@ If no eligible baseline exists, or its commit is missing or no longer an ancesto
 - Roll consumers back to a previous verified digest. Automatic alias rollback and registry deletion are not performed.
 
 Plans are retained for 14 days, candidates/failed reports for 7 days, and release metadata for 90 days. Preserve metadata externally for longer retention. Retired entries stop receiving updates; historical registry cleanup is separate.
+
+The v2 catalog consolidates the old CLI-specific repositories. See the
+[reference migration table and rollout requirements](runner.md). Historical
+published images remain available for rollback; this implementation does not
+apply policies or change controller deployments.

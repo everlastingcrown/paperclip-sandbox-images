@@ -4,15 +4,14 @@ Infrastructure for building and publishing sandbox images for [Paperclip](https:
 
 ```mermaid
 flowchart LR
-  Base[Base: hardening and Paperclip tooling] --> Harness[Harness: exact CLI version]
-  Harness --> Toolset[Toolset: exact capability version]
+  Base[Base: Runner, provider pack, CLIs and runtime] --> Toolset[Toolset: Expo or Godot capability]
 ```
 
-The active catalog includes [base runtime 1.0.0](images/base/runtime/README.md): Node.js 24, Python 3.11 with virtual environments, shared runtime tools, the Paperclip agent shim, and non-root defaults for AMD64 and ARM64. CI builds and tests registered recipes before publication.
+The active catalog includes [base runtime 2.0.0](images/base/runtime/README.md): Node.js 24, Python 3.13 with virtual environments, shared runtime tools, the Paperclip agent shim, and non-root defaults for AMD64 and ARM64. CI builds and tests registered recipes before publication.
 
-The [Expo toolset](images/toolsets/expo/README.md) adds Expo web development, Playwright Chromium, and AMD64 Android builds to the Codex harness.
+The [Expo toolset](images/toolsets/expo/README.md) adds Expo web development, Playwright Chromium, and AMD64 Android builds to the shared base.
 
-The [Godot toolset](images/toolsets/godot/README.md) adds headless Godot development, Web/Linux/Windows exports, SQLite, and Playwright Chromium to Codex and OpenCode on AMD64 and ARM64.
+The [Godot toolset](images/toolsets/godot/README.md) adds headless Godot development, Web/Linux/Windows exports, SQLite, and Playwright Chromium to the shared base on AMD64 and ARM64.
 
 ## Layout
 
@@ -20,8 +19,7 @@ The [Godot toolset](images/toolsets/godot/README.md) adds headless Godot develop
 | ------------------------------ | ---------------------------------------------------------------------------- |
 | `catalog/`                     | Active image definitions and JSON Schema                                     |
 | `images/base/`                 | Shared runtime and hardening recipes                                         |
-| `images/harnesses/`            | Agent CLI recipes                                                            |
-| `images/toolsets/`             | Capability recipes layered onto harnesses                                    |
+| `images/toolsets/`             | Capability recipes layered onto base                                         |
 | `src/`                         | TypeScript validation, dependency planning, building, testing, and promotion |
 | `scripts/`                     | Runtime contract and checksum-pinned CI tools                                |
 | `tests/`                       | Infrastructure tests and illustrative catalog metadata                       |
@@ -55,7 +53,7 @@ Relevant pushes to `main` rebuild affected entries and all descendants. Pull req
 
 Both AMD64 and ARM64 must pass runtime checks and scans before publication. The pipeline promotes tested OCI artifacts to `ghcr.io/everlastingcrown`, signs them, and attaches SBOMs and provenance before moving version aliases and `latest`.
 
-Tags identify the primary capability, with harness versions included for toolsets. `latest` selects the highest stable capability version, then the highest stable harness version. Older-version rebuilds cannot move `latest`. Use immutable build tags or digests for reproducibility.
+Tags identify the primary capability with plain SemVer, such as `sandbox-expo:2.0.0`. `latest` selects the highest stable capability version. Older-version rebuilds cannot move `latest`. Use immutable build tags or digests for reproducibility.
 
 See [image authoring](docs/images.md), [releases and recovery](docs/releases.md), and [the validation contract](docs/validation.md).
 
@@ -66,3 +64,11 @@ Enable Actions with package publishing allowed. The default GHCR namespace uses 
 Make published parent packages publicly readable for unauthenticated fork PR builds. GHCR packages may initially be private; configure visibility and repository access after their first release. Install/enable Renovate separately; `renovate.json` supplies its configuration.
 
 Protect `main` with Repository checks and both architecture candidate jobs. Real image and registry integration require a successful workflow run.
+
+## Runner release and migration
+
+All three images include Paperclip Runner and its untouched provider pack from
+Paperclip v2026.1106.0, with `codex`, `claude`, `claude-code`, and `opencode`
+directly available on PATH. CLI versions follow that Paperclip release. System
+Node remains first on PATH; the provider launchers use their own pinned runtime.
+See [release matching and migration](docs/runner.md) before rollout.

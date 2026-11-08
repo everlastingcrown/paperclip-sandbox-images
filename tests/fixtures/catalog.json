@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "images": [
     {
       "id": "base-1",
@@ -9,21 +9,31 @@
       "version": "1.0.0",
       "dockerfile": "images/base/runtime/Dockerfile",
       "context": "images/base/runtime",
-      "args": { "NODE_VERSION": "24.15.0" },
+      "args": {
+        "NODE_VERSION": "24.15.0"
+      },
       "watch": ["shared/paperclip-shim"],
       "platforms": ["linux/amd64", "linux/arm64"],
-      "checks": []
+      "checks": [
+        {
+          "command": "node",
+          "expected": "24.22.0",
+          "smoke": "node -e \"console.log(1)\""
+        }
+      ]
     },
     {
       "id": "codex-old",
-      "layer": "harness",
+      "layer": "toolset",
       "repository": "sandbox-codex",
       "capability": "codex",
       "version": "0.99.0",
       "parent": "base-1",
-      "dockerfile": "images/harnesses/codex/Dockerfile",
-      "context": "images/harnesses/codex",
-      "args": { "CODEX_VERSION": "0.99.0" },
+      "dockerfile": "images/toolsets/codex/Dockerfile",
+      "context": "images/toolsets/codex",
+      "args": {
+        "CODEX_VERSION": "0.99.0"
+      },
       "watch": [],
       "platforms": ["linux/amd64", "linux/arm64"],
       "checks": [
@@ -36,14 +46,16 @@
     },
     {
       "id": "codex-new",
-      "layer": "harness",
+      "layer": "toolset",
       "repository": "sandbox-codex",
       "capability": "codex",
       "version": "0.114.0",
       "parent": "base-1",
-      "dockerfile": "images/harnesses/codex/Dockerfile",
-      "context": "images/harnesses/codex",
-      "args": { "CODEX_VERSION": "0.114.0" },
+      "dockerfile": "images/toolsets/codex/Dockerfile",
+      "context": "images/toolsets/codex",
+      "args": {
+        "CODEX_VERSION": "0.114.0"
+      },
       "watch": [],
       "platforms": ["linux/amd64", "linux/arm64"],
       "checks": [
@@ -55,18 +67,25 @@
       ]
     },
     {
-      "id": "python-old-codex",
+      "id": "python-old",
       "layer": "toolset",
-      "repository": "sandbox-python-codex",
+      "repository": "sandbox-python",
       "capability": "python",
       "version": "3.13.2",
-      "parent": "codex-old",
+      "parent": "base-1",
       "dockerfile": "images/toolsets/python/Dockerfile",
       "context": "images/toolsets/python",
-      "args": { "PYTHON_VERSION": "3.13.2" },
+      "args": {
+        "PYTHON_VERSION": "3.13.2"
+      },
       "watch": [],
       "platforms": ["linux/amd64", "linux/arm64"],
       "checks": [
+        {
+          "command": "codex",
+          "expected": "0.160.0",
+          "smoke": "codex --help >/dev/null"
+        },
         {
           "command": "python",
           "expected": "3.13.2",
@@ -75,21 +94,28 @@
       ]
     },
     {
-      "id": "python-new-codex",
+      "id": "python-new",
       "layer": "toolset",
-      "repository": "sandbox-python-codex",
+      "repository": "sandbox-python",
       "capability": "python",
-      "version": "3.13.2",
-      "parent": "codex-new",
+      "version": "3.13.3",
+      "parent": "base-1",
       "dockerfile": "images/toolsets/python/Dockerfile",
       "context": "images/toolsets/python",
-      "args": { "PYTHON_VERSION": "3.13.2" },
+      "args": {
+        "PYTHON_VERSION": "3.13.2"
+      },
       "watch": [],
       "platforms": ["linux/amd64", "linux/arm64"],
       "checks": [
         {
+          "command": "codex",
+          "expected": "0.160.0",
+          "smoke": "codex --help >/dev/null"
+        },
+        {
           "command": "python",
-          "expected": "3.13.2",
+          "expected": "3.13.3",
           "smoke": "python -c 'print(1 + 1)'"
         }
       ]

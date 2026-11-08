@@ -85,29 +85,17 @@ export function assertCatalog(
       const parent = byId.get(image.parent);
       if (!parent)
         throw new Error(`Missing parent ${image.parent} for ${image.id}`);
-      const expected = image.layer === 'harness' ? 'base' : 'harness';
-      if (parent.layer !== expected)
+      if (parent.layer !== 'base')
         throw new Error(`Invalid parent layer: ${image.id}`);
       if (image.platforms.some((p) => !parent.platforms.includes(p)))
         throw new Error(`Incompatible platforms: ${image.id}`);
     }
-    const tag = `${image.repository}:${versionTag(image, data.images)}`;
+    const tag = `${image.repository}:${versionTag(image)}`;
     // Leave room for the immutable build suffix.
     if (tag.split(':')[1]!.length > 80)
       throw new Error(`Version tag too long: ${image.id}`);
     if (tags.has(tag)) throw new Error(`Tag collision: ${tag}`);
     tags.add(tag);
-  }
-  for (const repository of repositories.keys()) {
-    const harnesses = new Set(
-      data.images
-        .filter((i) => i.repository === repository && i.layer === 'toolset')
-        .map((i) => byId.get(i.parent!)!.capability),
-    );
-    if (harnesses.size > 1)
-      throw new Error(
-        `Toolset repository must identify one harness: ${repository}`,
-      );
   }
   topological(data.images);
 }
@@ -132,40 +120,32 @@ export function topological(images: Image[]): Image[] {
   return sorted;
 }
 
-export function versionTag(image: Image, images: Image[]): string {
-  if (image.layer !== 'toolset') return image.version;
-  const harness = images.find((i) => i.id === image.parent);
-  if (!harness) throw new Error(`Missing harness for ${image.id}`);
-  return `${image.version}-${harness.capability}-${harness.version}`;
+export function versionTag(image: Image): string {
+  return image.version;
 }
 
 export function latestEntries(images: Image[]): Record<string, string> {
   const result: Record<string, string> = {};
   for (const image of images) {
-    const harness =
-      image.layer === 'toolset'
-        ? images.find((i) => i.id === image.parent)
-        : undefined;
-    if (
-      semver.prerelease(image.version) ||
-      (harness && semver.prerelease(harness.version))
-    )
-      continue;
+    if (semver.prerelease(image.version)) continue;
     const current = images.find((i) => i.id === result[image.repository]);
-    const oldHarness =
-      current?.layer === 'toolset'
-        ? images.find((i) => i.id === current.parent)
-        : undefined;
-    if (
-      !current ||
-      semver.gt(image.version, current.version) ||
-      (image.version === current.version &&
-        harness &&
-        oldHarness &&
-        semver.gt(harness.version, oldHarness.version))
-    ) {
+    if (!current || semver.gt(image.version, current.version)) {
       result[image.repository] = image.id;
     }
   }
   return result;
+}
+
+// Historical v1 graphs are deliberately not validated using the v2 contract.
+// Their presence schedules every current image, including renamed descendants.
+export function releaseCatalog(data: unknown): Catalog | null {
+  if (
+    data &&
+    typeof data === 'object' &&
+    'schemaVersion' in data &&
+    data.schemaVersion === 1
+  )
+    return null;
+  assertCatalog(data);
+  return data;
 }

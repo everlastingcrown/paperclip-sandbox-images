@@ -1,21 +1,25 @@
-# Base runtime 1.0.0
+# Base runtime 2.0.0
 
-The `base-1` catalog entry publishes `sandbox-base:1.0.0` for Linux AMD64 and ARM64. This version identifies the shared runtime contract; Node and operating system security updates can be incorporated through rebuilds and reviewed pin updates.
+The `base-2` catalog entry publishes `sandbox-base:2.0.0` for Linux AMD64 and ARM64. This version identifies the shared runtime contract; Node and operating system security updates can be incorporated through rebuilds and reviewed pin updates.
 
 ## Contents and defaults
 
-- Debian Bookworm with Node.js 24.22.0 and npm from the digest-pinned official Node image.
+- Debian Trixie with Node.js 24.22.0 and npm from the digest-pinned official Node image.
 - npm's bundled `brace-expansion` and `undici` dependencies receive compatible releases 5.0.11 and 6.29.1, downloaded with verified SHA-256 checksums. These fix CVE-2026-102276, CVE-2026-102278, CVE-2026-19534, and CVE-2026-109869 while upstream npm still bundles affected versions. Update versions and checksums together; remove the overrides once the pinned Node image includes fixed dependencies. The offline smoke check exercises `npm pack`.
-- Python 3.11 from Bookworm, available as both `python` and `python3`, with `venv` support and pip inside virtual environments. Use `python -m venv /workspace/.venv` and `/workspace/.venv/bin/python -m pip install ...` for project dependencies. The offline runtime contract creates a virtual environment, checks pip, and exercises Python file I/O.
-- Bash/POSIX shell, CA certificates, coreutils, curl, GitHub CLI (`gh`), git, jq, ripgrep, tar, and tini. Distribution packages receive security updates at build time; APT versions intentionally follow Bookworm updates. The offline runtime contract checks `gh --version` and JSON processing with `jq`; supply GitHub credentials per run when authenticated operations are needed.
-- The build requires at least Bookworm's Brotli `1.0.9-2+deb12u1` and OpenSSL `3.0.22-1~deb12u2` security fixes for CVE-2026-111497 and CVE-2026-84782. These are minimum versions, not package pins; newer security updates remain eligible. Changing this base recipe rebuilds every descendant rather than reusing older published harness layers.
+- Python 3.13 from Trixie, available as both `python` and `python3`, with `venv` support and pip inside virtual environments. Use `python -m venv /workspace/.venv` and `/workspace/.venv/bin/python -m pip install ...` for project dependencies. The offline runtime contract creates a virtual environment, checks pip, and exercises Python file I/O.
+- Bash/POSIX shell, CA certificates, coreutils, curl, GitHub CLI (`gh`), git, jq, ripgrep, tar, and tini. Distribution packages receive security updates at build time; APT versions intentionally follow Trixie updates. The offline runtime contract checks `gh --version` and JSON processing with `jq`; supply GitHub credentials per run when authenticated operations are needed.
 - A statically compiled `paperclip-agent-shim`, built with digest-pinned Go 1.27.3. The compiler is confined to the build stage. BuildKit cross-compiles the shim for the target architecture without downloading Go modules.
 - User/group `paperclip` (`1000:1000`), home `/home/paperclip`, workspace `/workspace`, cache `/home/paperclip/.cache`, and temporary directory `/tmp`. Home, cache, and workspace are owned by the runtime user.
 - Entrypoint `/usr/bin/tini --` and default command `/usr/local/bin/paperclip-agent-shim`.
 
-The official Node image's existing UID/GID 1000 account is renamed to preserve the Paperclip contract. Node and npm are already on PATH; launch requires no profile changes or runtime installers. Harness images add their agent CLI using `FROM paperclip-parent`.
+The official Node image's existing UID/GID 1000 account is renamed to preserve the Paperclip contract. Node and npm are already on PATH; launch requires no profile changes or runtime installers. Toolsets extend this base using `FROM paperclip-parent`.
 
-The active [harness catalog](../../harnesses/README.md) adds Claude, Codex, and OpenCode on this base. Select `base-1` to rebuild the base and all three descendants together; select a harness ID to reuse a published base.
+The pinned official Paperclip v2026.1106.0 image supplies the Runner daemon and provider pack, with Codex
+0.160.0, Claude 2.1.286 (from the pinned Claude Agent SDK), and OpenCode 1.18.34.
+The direct `claude-code` alias uses the same pack launcher as `claude`.
+OpenCode's managed `/etc/opencode/opencode.json` disables snapshots.
+See [Runner provenance and release matching](../../../docs/runner.md).
+Select `base-2` to rebuild the base and both toolsets together.
 
 The provider mounts a readable `/run/paperclip/runtime-command.json`, for example:
 
@@ -44,7 +48,7 @@ The Debian Node image replaces upstream's Ubuntu/NodeSource installation to pin 
 ## Build and validation
 
 ```sh
-pnpm images plan --select base-1 --resolve
+pnpm images plan --select base-2 --resolve
 pnpm images build --platform linux/amd64
 pnpm images test --platform linux/amd64
 ```

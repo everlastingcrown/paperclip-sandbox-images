@@ -7,9 +7,14 @@ import {
 } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { assertCatalog, loadCatalog } from './catalog.js';
+import { releaseCatalog, loadCatalog } from './catalog.js';
 import { run } from './command.js';
-import { affected, createPlan, resolveParents } from './plan.js';
+import {
+  affected,
+  assertPlanVersion,
+  createPlan,
+  resolveParents,
+} from './plan.js';
 import { build } from './build.js';
 import { testImages } from './test-images.js';
 import { publish } from './publish.js';
@@ -37,7 +42,7 @@ const { positionals, values } = parseArgs({
 const planPath = (): string => values.plan ?? resolve(values.out, 'plan.json');
 function loadPlan(): Plan {
   const plan = JSON.parse(readFileSync(planPath(), 'utf8')) as Plan;
-  if (plan.schemaVersion !== 1) throw new Error('Unsupported plan version');
+  assertPlanVersion(plan);
   if (plan.source !== run('git', ['rev-parse', 'HEAD']))
     throw new Error('Plan source does not match checkout');
   return plan;
@@ -59,8 +64,11 @@ try {
     }
     case 'plan': {
       const catalog = loadCatalog(values.catalog);
-      let previous: Catalog = { schemaVersion: 1, images: [] };
-      if (values.previous) previous = loadCatalog(values.previous, false);
+      let previous: Catalog | null = { schemaVersion: 2, images: [] };
+      if (values.previous)
+        previous = releaseCatalog(
+          JSON.parse(readFileSync(values.previous, 'utf8')),
+        );
       else if (values.base) {
         const names = run('git', [
           'ls-tree',
@@ -72,8 +80,7 @@ try {
           const parsed: unknown = JSON.parse(
             run('git', ['show', `${values.base}:${values.catalog}`]),
           );
-          assertCatalog(parsed);
-          previous = parsed;
+          previous = releaseCatalog(parsed);
         }
       } else previous = catalog;
       const files = values.base
@@ -146,6 +153,8 @@ try {
         run('hadolint', [file]);
       for (const file of [
         'scripts/runtime-contract.sh',
+        'images/base/runtime/cli-wrapper',
+        'images/toolsets/expo/java-openshell-ca.sh',
         'scripts/install-skopeo.sh',
         'images/toolsets/expo/install-android.sh',
         'images/toolsets/expo/smoke.sh',

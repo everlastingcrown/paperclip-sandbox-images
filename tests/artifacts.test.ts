@@ -171,7 +171,7 @@ describe('runtime and scanner gates', () => {
     testedFixture(plan, out);
     const run: Runner = (command, args) => {
       if (args.includes('command -v "$1" >/dev/null && "$1" --version'))
-        return version;
+        return args.at(-1) === 'node' ? 'v24.22.0' : version;
       if (args[0] === 'logs') return 'signal-ready';
       if (args[0] === 'inspect') return '42';
       if (command === 'trivy' && args.includes('--output'))
@@ -203,6 +203,11 @@ describe('runtime and scanner gates', () => {
     testedFixture(plan, out);
     const run: Runner = (command, args) => {
       if (command === 'trivy') throw new Error('scanner unavailable');
+      if (
+        args.includes('command -v "$1" >/dev/null && "$1" --version') &&
+        args.at(-1) === 'node'
+      )
+        return 'v24.22.0';
       if (args[0] === 'logs') return 'signal-ready';
       if (args[0] === 'inspect') return '42';
       return '';
@@ -217,6 +222,11 @@ describe('runtime and scanner gates', () => {
     const out = temp();
     testedFixture(plan, out);
     const run = vi.fn<Runner>((command, args) => {
+      if (
+        args.includes('command -v "$1" >/dev/null && "$1" --version') &&
+        args.at(-1) === 'node'
+      )
+        return 'v24.22.0';
       if (args[0] === 'logs') return 'signal-ready';
       if (args[0] === 'inspect') return '42';
       if (command === 'trivy' && args.includes('--output'))
@@ -327,7 +337,7 @@ describe('publication', () => {
     const plan = planFor();
     const out = temp();
     testedFixture(plan, out);
-    rmSync(join(out, 'arm64', 'python-new-codex.tested.json'));
+    rmSync(join(out, 'arm64', 'python-new.tested.json'));
     const run = vi.fn<Runner>(() => '');
     expect(() => publish(plan, out, run)).toThrow('Missing passing report');
     expect(run).not.toHaveBeenCalled();
@@ -340,7 +350,7 @@ describe('publication', () => {
   });
   it('skips an empty catalog', () => {
     const run = vi.fn<Runner>(() => '');
-    publish(planFor({ schemaVersion: 1, images: [] }), temp(), run);
+    publish(planFor({ schemaVersion: 2, images: [] }), temp(), run);
     expect(run).not.toHaveBeenCalled();
   });
 });

@@ -1,24 +1,24 @@
 # Authoring images
 
-`catalog/images.json` is the only active catalog. `tests/fixtures/catalog.json` illustrates maintained versions and a base → harness → Python dependency chain. Its metadata is illustrative and CI never builds it.
+`catalog/images.json` is the only active catalog. `tests/fixtures/catalog.json` illustrates maintained versions and a base → toolset dependency chain. Its metadata is illustrative and CI never builds it.
 
 ## Catalog contract
 
 | Field                   | Meaning                                                                      |
 | ----------------------- | ---------------------------------------------------------------------------- |
 | `id`                    | Unique stable identifier; also a Bake target                                 |
-| `layer`                 | `base`, `harness`, or `toolset`                                              |
+| `layer`                 | `base` or `toolset`                                                          |
 | `repository`            | Registry repository name beginning with `sandbox-`                           |
 | `capability`            | Primary capability name, e.g. `base`, `codex`, `python`                      |
 | `version`               | Exact canonical SemVer without build metadata                                |
-| `parent`                | Required for harness/toolset; absent for base                                |
+| `parent`                | Required for toolset; absent for base                                        |
 | `dockerfile`, `context` | Repository-relative recipe file and build context directory                  |
 | `args`                  | Pinned build arguments; never credentials                                    |
 | `watch`                 | Additional files/directories that trigger rebuilds                           |
 | `platforms`             | Both `linux/amd64` and `linux/arm64`                                         |
 | `checks`                | Command, expected `--version` value, and credential-free shell smoke command |
 
-Harnesses depend on a base; toolsets depend on a harness. A repository identifies one layer/capability and, for toolsets, one harness family. Multiple capability and parent versions can coexist; output tags must be unique.
+Toolsets depend directly on a base. A repository identifies one layer/capability. Multiple capability and parent versions can coexist; output tags must be unique.
 
 Use narrow build contexts. Any changed file beneath a context triggers its image; `context: "."` treats every file as an input. `watch` accepts literal paths, not globs. Include shared installation scripts and vendored Paperclip sources. Declared paths must exist and resolve inside the repository.
 
@@ -27,7 +27,7 @@ Derived recipes must use `paperclip-parent` as their parent `FROM` reference. Ba
 ## Adding or updating a version
 
 1. Add the recipe and inputs beneath its layer directory. Pin external base images by digest, tools by exact version, and Paperclip source by reviewed immutable revision.
-2. Register its exact parent and installation arguments. Each non-base entry requires a version check matching its primary version and a meaningful smoke command. Toolsets inherit harness checks.
+2. Register its exact parent and installation arguments. Each non-base entry requires a version check matching its primary version and a meaningful smoke command. Toolsets inherit base checks.
 3. Supply a ready PATH. Ordinary launches must not need `nvm`, profile modification, or runtime installation.
 4. Run repository checks, lint the recipe, and build/test both architectures before merge.
 
@@ -44,7 +44,7 @@ node scripts/install-tools.ts images
 export PATH="$PWD/out/tools:$PATH"
 pnpm images plan --base <base-commit> --resolve
 # Or explicitly choose IDs and their descendants:
-pnpm images plan --select codex-new --resolve
+pnpm images plan --select expo-2 --resolve
 pnpm images build --platform linux/amd64
 pnpm images test --platform linux/amd64
 ```
@@ -107,13 +107,15 @@ Rebuild the image and recreate existing sandboxes to install these dependencies.
 
 Remove retired entries and remove/reparent descendants together. Registry artifacts are retained. Removing the selected `latest` schedules the next highest stable entry for validation. With no stable entries, no new `latest` is created; historical alias removal remains a deliberate registry administration action.
 
-Renovate updates npm dependencies, Actions, external Dockerfile digests, and BuildKit. Future Dockerfile version constants can be annotated:
-
-```text
-# renovate: datasource=npm depName=@openai/codex
-ARG CODEX_VERSION=0.114.0
-```
+Renovate updates npm dependencies, Actions, external Dockerfile digests, and BuildKit.
+Provider CLI versions are owned by the Paperclip release. Update the source image,
+release metadata, daemon hashes, pack identities and CLI checks together as described
+in [Runner release matching](runner.md). Do not update an individual CLI in the pack.
 
 Update matching catalog versions, arguments, and checks together. Catalog entries remain deliberate support decisions; Renovate does not retire versions or generate combinations.
 
 Update CI binary versions, asset URLs, and official release checksums together in `scripts/tools.lock.json`. Checksum mismatch is fatal. Skopeo's architecture-specific Ubuntu revisions are pinned in `scripts/install-skopeo.sh`; maintain these with the runner distribution.
+
+Catalogs and build plans use `schemaVersion: 2`. Old build plans fail with a
+regeneration instruction. A historical v1 release baseline triggers a full rebuild
+without interpreting or validating its retired dependency graph.

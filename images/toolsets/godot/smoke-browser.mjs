@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import serveHandler from './node_modules/serve-handler/src/index.js';
 import { chromium } from './node_modules/playwright/index.mjs';
 
-// BuildKit can run harness variants in the same network namespace. Let the OS
+// BuildKit can run independent toolsets in the same network namespace. Let the OS
 // allocate a port and use this server's address rather than probing a shared one.
 const server = createServer((request, response) =>
   serveHandler(request, response, { public: resolve('exports') }),

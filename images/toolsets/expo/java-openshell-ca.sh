@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 # Login shells run this after OpenShell mounts its per-sandbox proxy CA.
 # Keep the image's JDK truststore read-only and retain its public roots.
 _paperclip_java_openshell_ca() (
@@ -6,7 +7,7 @@ _paperclip_java_openshell_ca() (
     *-Djavax.net.ssl.trustStore=*) return 0 ;;
   esac
 
-  _java_home=${JAVA_HOME:-/opt/java17}
+  _java_home=${JAVA_HOME:-/opt/java21}
   # A private directory prevents collisions between users and concurrent shells.
   # Create a fresh copy so a restarted sandbox cannot reuse an obsolete CA.
   umask 077
