@@ -12,6 +12,7 @@ printf '{"tool":"jq"}\n' | jq -e '.tool == "jq"' >/dev/null
 node -e 'if (Number(process.versions.node.split(".")[0]) < 24) process.exit(1)'
 
 python -c 'import sys; assert sys.version_info[:2] == (3, 13)'
+python -c 'import yaml; assert yaml.safe_load("paperclip: true") == {"paperclip": True}'
 python3 -m venv /tmp/python-contract-venv
 /tmp/python-contract-venv/bin/python -m pip --version
 /tmp/python-contract-venv/bin/python -c 'import pathlib; p = pathlib.Path("/workspace/python-smoke.txt"); p.write_text("paperclip\n"); assert p.read_text() == "paperclip\n"; p.unlink()'

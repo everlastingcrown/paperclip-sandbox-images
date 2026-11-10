@@ -30,7 +30,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         bash ca-certificates coreutils curl gh git jq \
-        python3 python-is-python3 python3-venv ripgrep tar tini \
+        python3 python-is-python3 python3-venv python3-yaml ripgrep tar tini \
     # Trixie uses the time64 OpenSSL package. Scans gate security updates.
     && dpkg-query -W libbrotli1 libssl3t64 openssl \
     && python3 -c 'import sys; assert sys.version_info[:2] == (3, 13)' \
